@@ -1,0 +1,638 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expressions Trainer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Minimal extras */
+    .card { @apply rounded-2xl shadow-lg p-6 bg-white; }
+    .btn  { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium shadow-sm bg-slate-900 text-white hover:bg-slate-800 active:scale-[.98]; }
+    .btn-sec { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 font-medium bg-slate-100 hover:bg-slate-200 text-slate-800; }
+    .tag { @apply text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600; }
+    .pill { @apply text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700; }
+    .mode-tab { @apply px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-100; }
+    .mode-tab.active { @apply bg-slate-900 text-white; }
+    .grid-bingo { display:grid; grid-template-columns: repeat(3, 1fr); gap:.5rem; }
+    .bingo-cell { @apply border rounded-xl p-3 text-sm bg-white hover:bg-indigo-50 cursor-pointer; min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; }
+    .bingo-cell.used { @apply bg-green-100 line-through; }
+    .kbd { @apply inline-block px-2 py-0.5 text-xs rounded border bg-slate-50; }
+    .drag { @apply select-none cursor-move; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-6xl mx-auto p-4 sm:p-6">
+    <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold">Expressions Trainer</h1>
+        <p class="text-sm text-slate-600">44 célkifejezés aktív, játékos beépítéséhez (EN↔HU)</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="card !p-3 flex items-center gap-3">
+          <div class="text-center">
+            <div class="text-xs text-slate-500">Pontok</div>
+            <div id="points" class="text-xl font-semibold">0</div>
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+          <div class="text-center">
+            <div class="text-xs text-slate-500">Napi sorozat</div>
+            <div id="streak" class="text-xl font-semibold">0</div>
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+          <div class="text-center">
+            <div class="text-xs text-slate-500">Ismert kártyák</div>
+            <div id="knownCount" class="text-xl font-semibold">0</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Daily challenge -->
+    <section class="card mb-5" id="dailyBox">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-slate-500">Napi kihívás</div>
+          <div id="dailyText" class="text-lg font-semibold"></div>
+          <div class="mt-1 text-sm text-slate-600">Mondj egy rövid mondatot ezzel a kifejezéssel. Jelöld készre, ha elmondtad.</div>
+          <button id="btnDailyDone" class="btn-sec mt-3">Kihívás teljesítve</button>
+        </div>
+        <div class="text-right">
+          <span id="clusterStatus" class="pill"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="flex flex-wrap gap-2 mb-4" id="tabs">
+      <button class="mode-tab active" data-mode="flash">Flashcards</button>
+      <button class="mode-tab" data-mode="match">Matching</button>
+      <button class="mode-tab" data-mode="mcq">Multiple Choice</button>
+      <button class="mode-tab" data-mode="transform">Transformation</button>
+      <button class="mode-tab" data-mode="prompt">Prompted Speaking</button>
+      <button class="mode-tab" data-mode="bingo">Quick Fire / Bingo</button>
+      <button class="mode-tab" data-mode="progress">Progress</button>
+      <span class="ml-auto text-sm text-slate-500">Tippek: <span class="kbd">R</span> újratölt / <span class="kbd">F</span> flip / <span class="kbd">K</span> I know</span>
+    </nav>
+
+    <!-- Mode containers -->
+    <main id="views" class="space-y-4">
+      <!-- FLASHCARDS -->
+      <section id="view-flash" class="card">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-slate-500">Aktív pakli: <span id="flashCount">0</span> kártya</div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm">Oldal: 
+                  <select id="flashSide" class="border rounded px-2 py-1 text-sm">
+                    <option value="hu">HU → EN</option>
+                    <option value="en">EN → HU</option>
+                  </select>
+                </label>
+                <label class="text-sm">Klaszter:
+                  <select id="clusterFilter" class="border rounded px-2 py-1 text-sm"></select>
+                </label>
+              </div>
+            </div>
+            <div id="flashCard" class="mt-4 border rounded-2xl p-6 bg-indigo-50 cursor-pointer">
+              <div id="flashFront" class="text-xl font-semibold"></div>
+              <div id="flashBack" class="mt-2 text-slate-700 hidden"></div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button id="btnFlip" class="btn">Flip (F)</button>
+              <button id="btnIKnow" class="btn-sec">I know (K)</button>
+              <button id="btnKeep" class="btn-sec">Still studying</button>
+              <button id="btnNext" class="btn-sec">Next (R)</button>
+              <button id="btnResetKnown" class="btn-sec">Reset known for this cluster</button>
+            </div>
+          </div>
+          <aside class="w-full sm:w-64">
+            <div class="text-sm mb-2">Ismert kártyák ebben a klaszterben</div>
+            <ul id="knownList" class="text-sm space-y-1 max-h-64 overflow-auto"></ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- MATCHING -->
+      <section id="view-match" class="card hidden">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-slate-600">Párosítsd az 5 kifejezést (HU ↔ EN). Kattints egy HU elemre, majd a párjára.</div>
+          <button id="btnNewMatch" class="btn-sec">Új készlet</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="matchGrid"></div>
+        <div id="matchMsg" class="mt-3 text-sm"></div>
+      </section>
+
+      <!-- MCQ -->
+      <section id="view-mcq" class="card hidden">
+        <div class="text-sm text-slate-600">Válaszd ki, melyik jelentése illik a kiemelt kifejezéshez.</div>
+        <div class="mt-3" id="mcqBox"></div>
+        <div class="mt-3 flex gap-2">
+          <button id="btnNewMcq" class="btn-sec">Új kérdés</button>
+        </div>
+      </section>
+
+      <!-- TRANSFORMATION -->
+      <section id="view-transform" class="card hidden">
+        <div class="text-sm text-slate-600">Írd át a mondatot a célkifejezés használatával. (Részben szabad megoldás, több jó válasz lehetséges.)</div>
+        <div class="mt-3 space-y-3" id="transformBox"></div>
+        <div class="mt-2"><button id="btnNewTransform" class="btn-sec">Új feladat</button></div>
+      </section>
+
+      <!-- PROMPTED SPEAKING -->
+      <section id="view-prompt" class="card hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-slate-600">Mondd el 45–60 másodpercben. Pipáld ki, amit használtál.</div>
+            <div id="promptTopic" class="text-lg font-semibold mt-1"></div>
+          </div>
+          <div class="text-sm"><span id="promptTimer" class="font-mono">00:60</span></div>
+        </div>
+        <div id="promptExpr" class="mt-3 flex flex-wrap gap-2"></div>
+        <div class="mt-3 flex gap-2">
+          <button id="btnStartPrompt" class="btn">Start</button>
+          <button id="btnNewPrompt" class="btn-sec">Új téma</button>
+        </div>
+      </section>
+
+      <!-- BINGO -->
+      <section id="view-bingo" class="card hidden">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-slate-600">Cél: mind a 9 kifejezést használd beszélgetés közben. Kattints, ha használtad.</div>
+          <button id="btnNewBingo" class="btn-sec">Új tábla</button>
+        </div>
+        <div id="bingoGrid" class="grid-bingo mt-3"></div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section id="view-progress" class="card hidden">
+        <h2 class="font-semibold mb-2">Haladás és feloldások</h2>
+        <div id="progressList" class="space-y-2"></div>
+        <div class="mt-4 text-sm text-slate-600">Feloldási szabály: egy klaszter újként elérhető, ha az előzőben az elemek ≥ 70%-át „I know” jelölted.</div>
+      </section>
+    </main>
+
+    <footer class="text-center text-xs text-slate-500 mt-8">
+      Made for classroom use • Stores progress locally in your browser • v1.0
+    </footer>
+  </div>
+
+  <script>
+    /***********************
+     * DATA
+     ***********************/
+    const EXPRESSIONS = [
+      {id:'e1',  en:"I’m not sure what/where/why exactly.", hu:"nem tudom, pontosan mit/hol/miért …", cluster:"opinions"},
+      {id:'e2',  en:"His main interest is …", hu:"fő érdeklődési köre …", cluster:"family"},
+      {id:'e3',  en:"A lot of people get divorced and live on their own, and bring up their children on their own.", hu:"Sokan elválnak, egyedül élnek, és a gyerekeiket is egyedül nevelik.", cluster:"family"},
+      {id:'e4',  en:"… which means …", hu:"ami azt jelenti, hogy …", cluster:"linkers"},
+      {id:'e5',  en:"He … for a living.", hu:"vmit csinál a megélhetésért / él vmiből", cluster:"work"},
+      {id:'e6',  en:"But I only have very vague memories of her.", hu:"De csak nagyon halvány emlékeim vannak róla.", cluster:"childhood"},
+      {id:'e7',  en:"I come from quite a big family.", hu:"Elég nagy családból származom.", cluster:"family"},
+      {id:'e8',  en:"However.", hu:"de / azonban", cluster:"linkers", note:"= but"},
+      {id:'e9',  en:"I suppose.", hu:"azt hiszem / gondolom", cluster:"opinions", note:"= I think"},
+      {id:'e10', en:"As I remember …", hu:"amennyire emlékszem / ha jól emlékszem", cluster:"memory"},
+      {id:'e11', en:"It was a lot better than …", hu:"sokkal jobb volt, mint …", cluster:"comparison"},
+      {id:'e12', en:"Normally.", hu:"általában", cluster:"frequency", note:"= usually"},
+      {id:'e13', en:"By the way …", hu:"mellesleg", cluster:"linkers"},
+      {id:'e14', en:"I have a lot of presents to buy at Christmas.", hu:"Sok ajándékot kell vennem karácsonykor.", cluster:"everyday"},
+      {id:'e15', en:"They were around my age.", hu:"kb. velem egykorúak voltak.", cluster:"people"},
+      {id:'e16', en:"They lived in the country for a while.", hu:"Vidéken éltek egy ideig.", cluster:"places"},
+      {id:'e17', en:"Nowadays …", hu:"manapság", cluster:"time"},
+      {id:'e18', en:"I don’t have a very close contact with …", hu:"nincs szoros kapcsolatom …-val/vel", cluster:"relationships"},
+      {id:'e19', en:"He/She is the breadwinner in the family.", hu:"Ő a kenyérkereső a családban.", cluster:"family"},
+      {id:'e20', en:"It sounds really nice.", hu:"Ez igazán jól hangzik.", cluster:"opinions"},
+      {id:'e21', en:"I started to get my independence and lived my own life a bit.", hu:"Kezdtem önálló lenni, és a saját életemet élni.", cluster:"growing"},
+      {id:'e22', en:"Occasionally.", hu:"néha", cluster:"frequency", note:"= sometimes"},
+      {id:'e23', en:"The family atmosphere is/was mostly very happy.", hu:"Nagyjából mindig jó volt a hangulat a családban.", cluster:"family"},
+      {id:'e24', en:"During my early childhood …", hu:"zsenge ifjúkoromban / kora gyermekkoromban", cluster:"childhood"},
+      {id:'e25', en:"Things were never really the same after that.", hu:"Azután semmi sem volt már ugyanolyan.", cluster:"memory"},
+      {id:'e26', en:"I must admit …", hu:"be kell vallanom / ismernem", cluster:"opinions"},
+      {id:'e27', en:"In my growing years …", hu:"fiatalkoromban", cluster:"growing"},
+      {id:'e28', en:"We didn’t get on so well a lot of times.", hu:"Sokszor nem jöttünk ki valami jól.", cluster:"relationships"},
+      {id:'e29', en:"Every other week.", hu:"minden második héten", cluster:"time"},
+      {id:'e30', en:"She seems to spend half of her life … (in the kitchen / cooking).", hu:"Fél életét (főzéssel) tölti.", cluster:"everyday"},
+      {id:'e31', en:"… which was a bit disappointing for me.", hu:"ami elég kiábrándító volt számomra", cluster:"feelings"},
+      {id:'e32', en:"Actually …", hu:"öööö / hát / igazából", cluster:"fillers"},
+      {id:'e33', en:"We have a lot of things in common / we have nothing in common.", hu:"Sok közös van bennünk / semmi közös sincs bennünk.", cluster:"relationships"},
+      {id:'e34', en:"He was not in the least interested in …", hu:"legkevésbé sem érdekelte …", cluster:"opinions"},
+      {id:'e35', en:"As far as I know …", hu:"már amennyire én tudom …", cluster:"opinions"},
+      {id:'e36', en:"He lived a very routine life.", hu:"Nagyon egyhangú életet élt.", cluster:"everyday"},
+      {id:'e37', en:"I organised for him to go to Spain.", hu:"Megszereztem / megszerveztem neki, hogy Spanyolországba utazzon.", cluster:"stories"},
+      {id:'e38', en:"… which was really fascinating.", hu:"ami lenyűgöző volt", cluster:"feelings"},
+      {id:'e39', en:"I suppose he is not just a sociable type.", hu:"Teszem azt, nem volt túl barátkozós fajta.", cluster:"people"},
+      {id:'e40', en:"I would say that …", hu:"azt mondanám, hogy …", cluster:"opinions"},
+      {id:'e41', en:"He gets completely lost in his books.", hu:"Teljesen belemerül a könyveibe.", cluster:"people"},
+      {id:'e42', en:"They really take care of each other.", hu:"Nagyon gondoskodnak egymásról.", cluster:"relationships"},
+      {id:'e43', en:"One of my dreams is to be happily married to a ripe old age.", hu:"Az egyik álmom az, hogy boldog házasságban éljek, amíg őszbe nem csavarodnak fáradt fürtjeim.", cluster:"dreams"},
+      {id:'e44', en:"So they say.", hu:"legalábbis ezt mondják", cluster:"fillers"},
+    ];
+
+    // Suggested simple prompts for speaking
+    const SPEAKING_TOPICS = [
+      "Tell me about your family and childhood.",
+      "Describe someone in your family.",
+      "Talk about changes in your life.",
+      "Share a story about a trip or plan.",
+      "What is your daily routine like nowadays?",
+      "What are your hopes and dreams about relationships?",
+    ];
+
+    // Lightweight transformation seeds (source -> must-use expression keyword)
+    const TRANSFORMS = [
+      {src:"He works as a driver.", must:"for a living", targetExample:"He drives for a living."},
+      {src:"I don’t remember much about my grandmother.", must:"vague memories", targetExample:"I only have very vague memories of my grandmother."},
+      {src:"To be honest, I think he isn’t very friendly.", must:"I would say", targetExample:"I would say that he isn’t very sociable."},
+      {src:"We are similar in many ways.", must:"in common", targetExample:"We have a lot of things in common."},
+      {src:"She usually cooks.", must:"seems to spend", targetExample:"She seems to spend half of her life in the kitchen."},
+      {src:"After that, everything changed.", must:"never really the same", targetExample:"Things were never really the same after that."},
+      {src:"People say it’s true.", must:"so they say", targetExample:"It’s true, so they say."},
+      {src:"In my opinion, it was much better than last year.", must:"a lot better than", targetExample:"It was a lot better than last year."},
+      {src:"Usually, we have a happy atmosphere.", must:"mostly very happy", targetExample:"The family atmosphere is mostly very happy."},
+    ];
+
+    /***********************
+     * STATE & STORAGE
+     ***********************/
+    const LS = {
+      get known(){ return new Set(JSON.parse(localStorage.getItem('knownExpr')||'[]')); },
+      set knownSet(set){ localStorage.setItem('knownExpr', JSON.stringify([...set])); },
+      get points(){ return +localStorage.getItem('points')||0; },
+      set points(v){ localStorage.setItem('points', v); },
+      get last(){ return localStorage.getItem('lastPractice')||''; },
+      set last(s){ localStorage.setItem('lastPractice', s); },
+      get streak(){ return +localStorage.getItem('streak')||0; },
+      set streak(v){ localStorage.setItem('streak', v); },
+      get unlocked(){ return new Set(JSON.parse(localStorage.getItem('unlockedClusters')||'[]')); },
+      set unlockedSet(set){ localStorage.setItem('unlockedClusters', JSON.stringify([...set])); },
+      get dailyDone(){ return localStorage.getItem('dailyDone')===todayStr(); },
+      setDailyDone(){ localStorage.setItem('dailyDone', todayStr()); }
+    };
+
+    const CLUSTERS = (()=>{
+      const map = new Map();
+      EXPRESSIONS.forEach(e=>{
+        if(!map.has(e.cluster)) map.set(e.cluster, []);
+        map.get(e.cluster).push(e);
+      });
+      return map; // Map<cluster, expr[]>
+    })();
+
+    // Unlock first cluster(s) by default
+    (function initUnlock(){
+      const defaultOpen = ['family','opinions'];
+      const set = LS.unlocked; defaultOpen.forEach(c=>set.add(c)); LS.unlockedSet = set;
+    })();
+
+    function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+
+    function updateStreak(){
+      const last = LS.last;
+      const today = todayStr();
+      if(last!==today){
+        if(last){
+          const y = new Date(last); const t = new Date(today);
+          const diff = Math.round((t - y)/(1000*3600*24));
+          if(diff===1) LS.streak = LS.streak + 1; else LS.streak = 1;
+        } else { LS.streak = 1; }
+        LS.last = today;
+      }
+      document.getElementById('streak').textContent = LS.streak;
+    }
+
+    function addPoints(n){ LS.points = LS.points + n; document.getElementById('points').textContent = LS.points; }
+
+    function refreshKnown(){
+      const known = LS.known; document.getElementById('knownCount').textContent = known.size;
+    }
+
+    function clusterList(){ return [...CLUSTERS.keys()].sort(); }
+
+    function unlockedClusters(){ return [...LS.unlocked].filter(c=>CLUSTERS.has(c)); }
+
+    function clusterProgress(cluster){
+      const arr = CLUSTERS.get(cluster)||[]; const known = LS.known; const k = arr.filter(e=>known.has(e.id)).length; const total = arr.length; const pct = total? Math.round(100*k/total):0;
+      return {k, total, pct};
+    }
+
+    function maybeUnlockNext(){
+      const list = clusterList();
+      const set = LS.unlocked;
+      for(let i=0;i<list.length-1;i++){
+        const c = list[i]; const n = list[i+1];
+        if(set.has(c) && !set.has(n)){
+          const {pct} = clusterProgress(c);
+          if(pct>=70){ set.add(n); LS.unlockedSet = set; toast(`New cluster unlocked: ${n}`); }
+        }
+      }
+      renderProgress(); renderClusterStatus(); fillClusterFilter();
+    }
+
+    function renderClusterStatus(){
+      const uc = unlockedClusters();
+      const txt = uc.length? `Unlocked clusters: ${uc.join(', ')}` : 'No clusters unlocked yet';
+      document.getElementById('clusterStatus').textContent = txt;
+    }
+
+    /***********************
+     * FLASHCARDS
+     ***********************/
+    let flashDeck = []; let flashIdx = 0; let flashFlipped=false;
+
+    function fillClusterFilter(){
+      const sel = document.getElementById('clusterFilter');
+      const list = ['all', ...clusterList().map(c=>({c,locked:!LS.unlocked.has(c)}))];
+      sel.innerHTML = '';
+      const optAll = document.createElement('option'); optAll.value='all'; optAll.textContent='All'; sel.appendChild(optAll);
+      clusterList().forEach(c=>{
+        const o = document.createElement('option'); o.value=c; o.textContent = LS.unlocked.has(c)? c : `${c} (locked)`; sel.appendChild(o);
+      });
+    }
+
+    function buildFlashDeck(){
+      const side = document.getElementById('flashSide').value;
+      const cluster = document.getElementById('clusterFilter').value;
+      const known = LS.known;
+      let arr = EXPRESSIONS.filter(e=> cluster==='all' ? true : e.cluster===cluster);
+      // hide known from active deck, but list at sidebar
+      flashDeck = arr.filter(e=>!known.has(e.id));
+      shuffle(flashDeck); flashIdx = 0; flashFlipped=false; renderFlash();
+      // sidebar known list
+      const list = document.getElementById('knownList');
+      list.innerHTML = '';
+      arr.filter(e=>known.has(e.id)).forEach(e=>{
+        const li=document.createElement('li'); li.textContent = (side==='hu'? e.hu : e.en); list.appendChild(li);
+      });
+      document.getElementById('flashCount').textContent = flashDeck.length;
+    }
+
+    function renderFlash(){
+      const front = document.getElementById('flashFront');
+      const back = document.getElementById('flashBack');
+      if(!flashDeck.length){
+        front.textContent = '🎉 Minden kártyát „I know”-ra jelöltél ebben a klaszterben!';
+        back.classList.add('hidden'); back.textContent=''; return;
+      }
+      const side = document.getElementById('flashSide').value;
+      const e = flashDeck[flashIdx];
+      front.textContent = side==='hu'? e.hu : e.en;
+      back.textContent  = side==='hu'? e.en : e.hu;
+      back.classList.toggle('hidden', !flashFlipped);
+    }
+
+    function flipFlash(){ flashFlipped = !flashFlipped; renderFlash(); }
+    function nextFlash(){ if(!flashDeck.length) return; flashIdx=(flashIdx+1)%flashDeck.length; flashFlipped=false; renderFlash(); }
+    function markIKnow(){
+      if(!flashDeck.length) return; const e = flashDeck[flashIdx];
+      const known = LS.known; known.add(e.id); LS.knownSet = known; addPoints(5); refreshKnown();
+      flashDeck.splice(flashIdx,1); if(flashIdx>=flashDeck.length) flashIdx=0; renderFlash(); maybeUnlockNext();
+    }
+
+    // reset known in current cluster
+    function resetKnownCluster(){
+      const cluster = document.getElementById('clusterFilter').value;
+      if(cluster==='all') { alert('Válassz klasztert a resethez.'); return; }
+      const ids = new Set((CLUSTERS.get(cluster)||[]).map(e=>e.id));
+      const known = LS.known; ids.forEach(id=> known.delete(id)); LS.knownSet = known; refreshKnown(); buildFlashDeck(); renderProgress();
+    }
+
+    /***********************
+     * MATCHING (HU↔EN)
+     ***********************/
+    let matchPairs = []; let matchSel = null; let matchedCount=0;
+
+    function newMatch(){
+      const pool = unlockedPools();
+      matchPairs = sample(pool, 5);
+      matchedCount=0; matchSel=null;
+      const left = matchPairs.map(e=>({id:e.id, text:e.hu, side:'hu'}));
+      const right = matchPairs.map(e=>({id:e.id, text:e.en, side:'en'}));
+      shuffle(left); shuffle(right);
+      const grid = document.getElementById('matchGrid'); grid.innerHTML='';
+      // left column (HU)
+      const colL = document.createElement('div'); colL.className = 'space-y-2';
+      left.forEach(item=> colL.appendChild(matchItem(item)));
+      // right column (EN)
+      const colR = document.createElement('div'); colR.className = 'space-y-2';
+      right.forEach(item=> colR.appendChild(matchItem(item)));
+      grid.appendChild(colL); grid.appendChild(colR);
+      document.getElementById('matchMsg').textContent='';
+    }
+
+    function matchItem(item){
+      const div = document.createElement('div');
+      div.className='border rounded-xl p-3 bg-white hover:bg-indigo-50 cursor-pointer';
+      div.textContent=item.text; div.dataset.id=item.id; div.dataset.side=item.side;
+      div.addEventListener('click', ()=> selectMatch(div));
+      return div;
+    }
+
+    function selectMatch(el){
+      if(el.classList.contains('opacity-40')) return; // already matched
+      if(!matchSel){ matchSel = el; el.classList.add('ring-2','ring-indigo-400'); return; }
+      if(matchSel===el){ matchSel.classList.remove('ring-2','ring-indigo-400'); matchSel=null; return; }
+      // check pair
+      if(matchSel.dataset.id===el.dataset.id && matchSel.dataset.side!==el.dataset.side){
+        // correct
+        matchSel.classList.add('opacity-40'); el.classList.add('opacity-40');
+        matchSel.classList.remove('ring-2','ring-indigo-400'); matchSel=null; matchedCount++; addPoints(3);
+        if(matchedCount===matchPairs.length){ document.getElementById('matchMsg').textContent='✔ Kész!'; addPoints(5); }
+      } else {
+        // wrong
+        shake(el); shake(matchSel); matchSel.classList.remove('ring-2','ring-indigo-400'); matchSel=null;
+      }
+    }
+
+    /***********************
+     * MCQ (definition → choose expression)
+     ***********************/
+    function newMcq(){
+      const pool = unlockedPools();
+      const q = randomChoice(pool);
+      const opts = uniqueSample(pool, 4, q);
+      const box = document.getElementById('mcqBox');
+      box.innerHTML = '';
+      const qEl = document.createElement('div'); qEl.className='text-xl font-semibold'; qEl.textContent = q.hu; box.appendChild(qEl);
+      const group = document.createElement('div'); group.className='mt-3 grid sm:grid-cols-2 gap-2';
+      opts.forEach(o=>{
+        const b=document.createElement('button'); b.className='btn-sec text-left'; b.textContent=o.en; b.addEventListener('click', ()=>{
+          if(o.id===q.id){ b.classList.add('!bg-green-100'); addPoints(2); toast('Correct'); } else { b.classList.add('!bg-red-100'); shake(b); }
+        }); group.appendChild(b);
+      });
+      box.appendChild(group);
+    }
+
+    /***********************
+     * TRANSFORMATION (free text check – keyword heuristic)
+     ***********************/
+    function newTransform(){
+      const t = randomChoice(TRANSFORMS);
+      const box = document.getElementById('transformBox');
+      box.innerHTML='';
+      const src = document.createElement('div'); src.className='text-lg font-semibold'; src.textContent = 'Rewrite: ' + t.src; box.appendChild(src);
+      const must = document.createElement('div'); must.className='text-sm text-slate-500'; must.textContent = `Use: “${t.must}”`; box.appendChild(must);
+      const inp = document.createElement('textarea'); inp.className='w-full border rounded-xl p-3 mt-2'; inp.rows=3; box.appendChild(inp);
+      const row = document.createElement('div'); row.className='mt-2 flex gap-2';
+      const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Check';
+      const hint = document.createElement('button'); hint.className='btn-sec'; hint.textContent='Show example';
+      const msg = document.createElement('div'); msg.className='text-sm mt-2';
+      row.appendChild(btn); row.appendChild(hint); box.appendChild(row); box.appendChild(msg);
+      btn.addEventListener('click', ()=>{
+        const ok = inp.value.toLowerCase().includes(t.must.toLowerCase());
+        if(ok){ msg.textContent='✔ Looks good!'; addPoints(4); } else { msg.textContent='Try to include the target phrase.'; shake(inp); }
+      });
+      hint.addEventListener('click', ()=>{ alert('Example: '+t.targetExample); });
+    }
+
+    /***********************
+     * PROMPTED SPEAKING
+     ***********************/
+    let promptTimer=null; let remaining=60;
+    function newPrompt(){
+      const topic = randomChoice(SPEAKING_TOPICS);
+      const picked = uniqueSample(unlockedPools(), 3);
+      document.getElementById('promptTopic').textContent = topic;
+      const cont = document.getElementById('promptExpr'); cont.innerHTML='';
+      picked.forEach(p=>{
+        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('!bg-green-100'));
+        cont.appendChild(chip);
+      });
+      resetTimer();
+    }
+    function resetTimer(){ clearInterval(promptTimer); remaining=60; renderTimer(); }
+    function startPrompt(){ resetTimer(); promptTimer = setInterval(()=>{ remaining--; renderTimer(); if(remaining<=0){ clearInterval(promptTimer); addPoints(5); toast('Time!'); } }, 1000); }
+    function renderTimer(){ document.getElementById('promptTimer').textContent = `00:${String(Math.max(0,remaining)).padStart(2,'0')}`; }
+
+    /***********************
+     * BINGO
+     ***********************/
+    function newBingo(){
+      const grid = document.getElementById('bingoGrid'); grid.innerHTML='';
+      const items = uniqueSample(unlockedPools(), 9);
+      items.forEach(it=>{
+        const c=document.createElement('div'); c.className='bingo-cell'; c.textContent=it.en; c.addEventListener('click',()=>{ c.classList.toggle('used'); checkBingoWin(); }); grid.appendChild(c);
+      });
+    }
+    function checkBingoWin(){
+      const cells=[...document.querySelectorAll('#bingoGrid .bingo-cell')];
+      const used=cells.filter(c=>c.classList.contains('used')).length;
+      if(used===9){ toast('Bingo! Great job using all 9.'); addPoints(10); }
+    }
+
+    /***********************
+     * PROGRESS
+     ***********************/
+    function renderProgress(){
+      const box=document.getElementById('progressList'); box.innerHTML='';
+      clusterList().forEach(c=>{
+        const {k,total,pct} = clusterProgress(c);
+        const wrap=document.createElement('div'); wrap.className='border rounded-xl p-3 bg-white flex items-center justify-between';
+        const left=document.createElement('div'); left.innerHTML=`<div class="font-medium">${c}</div><div class="text-xs text-slate-500">${LS.unlocked.has(c)?'unlocked':'locked'}</div>`;
+        const right=document.createElement('div'); right.innerHTML=`<div class="text-sm">${k}/${total} (${pct}%)</div>`;
+        const bar=document.createElement('div'); bar.className='w-full h-2 bg-slate-100 rounded-full mt-2';
+        const fill=document.createElement('div'); fill.className='h-2 rounded-full bg-indigo-500'; fill.style.width=pct+'%'; bar.appendChild(fill);
+        const col=document.createElement('div'); col.appendChild(left); col.appendChild(bar);
+        wrap.innerHTML=''; wrap.appendChild(col); wrap.appendChild(right); box.appendChild(wrap);
+      });
+    }
+
+    /***********************
+     * DAILY CHALLENGE
+     ***********************/
+    function buildDaily(){
+      const seed = Number(todayStr().replaceAll('-',''));
+      const rng = mulberry32(seed);
+      const pool = unlockedPools();
+      const pick = pool[Math.floor(rng()*pool.length)] || EXPRESSIONS[0];
+      document.getElementById('dailyText').textContent = `Use: “${pick.en}”`;
+      document.getElementById('btnDailyDone').onclick = ()=>{ if(!LS.dailyDone){ addPoints(5); LS.setDailyDone(); toast('Daily done!'); } };
+    }
+
+    /***********************
+     * HELPERS
+     ***********************/
+    function unlockedPools(){
+      const set = LS.unlocked; return EXPRESSIONS.filter(e=>set.has(e.cluster));
+    }
+
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    function sample(arr, n){ const c=[...arr]; shuffle(c); return c.slice(0, Math.min(n, c.length)); }
+    function uniqueSample(arr, n, ensure){ const c=[...arr]; if(ensure){ c.splice(c.indexOf(ensure),1); } shuffle(c); const out = ensure? [ensure]:[]; while(out.length<n && c.length){ out.push(c.shift()); } return shuffle(out); }
+    function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function toast(msg){
+      const el=document.createElement('div'); el.className='fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl shadow-lg'; el.textContent=msg; document.body.appendChild(el); setTimeout(()=> el.remove(), 1600);
+    }
+    function shake(el){ el.animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:200}); }
+
+    function keyShortcuts(){
+      document.addEventListener('keydown', (e)=>{
+        if(e.key==='f' || e.key==='F') flipFlash();
+        if(e.key==='k' || e.key==='K') markIKnow();
+        if(e.key==='r' || e.key==='R') nextFlash();
+      });
+    }
+
+    /***********************
+     * TABS
+     ***********************/
+    function switchTo(mode){
+      document.querySelectorAll('.mode-tab').forEach(t=> t.classList.toggle('active', t.dataset.mode===mode));
+      document.querySelectorAll('[id^="view-"]').forEach(v=> v.classList.add('hidden'));
+      document.getElementById('view-'+mode).classList.remove('hidden');
+      // lazy refresh per view
+      if(mode==='flash'){ buildFlashDeck(); }
+      if(mode==='match'){ newMatch(); }
+      if(mode==='mcq'){ newMcq(); }
+      if(mode==='transform'){ newTransform(); }
+      if(mode==='prompt'){ newPrompt(); }
+      if(mode==='bingo'){ newBingo(); }
+      if(mode==='progress'){ renderProgress(); }
+    }
+
+    /***********************
+     * INIT
+     ***********************/
+    function init(){
+      // populate UI
+      document.getElementById('points').textContent = LS.points;
+      refreshKnown(); updateStreak();
+      fillClusterFilter(); renderClusterStatus();
+      buildDaily();
+
+      // events
+      document.getElementById('flashCard').addEventListener('click', flipFlash);
+      document.getElementById('btnFlip').addEventListener('click', flipFlash);
+      document.getElementById('btnIKnow').addEventListener('click', markIKnow);
+      document.getElementById('btnKeep').addEventListener('click', nextFlash);
+      document.getElementById('btnNext').addEventListener('click', nextFlash);
+      document.getElementById('flashSide').addEventListener('change', buildFlashDeck);
+      document.getElementById('clusterFilter').addEventListener('change', buildFlashDeck);
+      document.getElementById('btnResetKnown').addEventListener('click', resetKnownCluster);
+
+      document.getElementById('btnNewMatch').addEventListener('click', newMatch);
+      document.getElementById('btnNewMcq').addEventListener('click', newMcq);
+
+      document.getElementById('btnNewTransform').addEventListener('click', newTransform);
+
+      document.getElementById('btnStartPrompt').addEventListener('click', startPrompt);
+      document.getElementById('btnNewPrompt').addEventListener('click', newPrompt);
+
+      document.getElementById('btnNewBingo').addEventListener('click', newBingo);
+
+      document.querySelectorAll('.mode-tab').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.mode)));
+
+      keyShortcuts();
+
+      // initial view
+      switchTo('flash');
+    }
+
+    document.getElementById('tabs');
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
+
