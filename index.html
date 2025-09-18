@@ -6,21 +6,32 @@
   <title>Expressions Trainer</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <style>
-    /* Minimal extras */
-    .card { @apply rounded-2xl shadow-lg p-6 bg-white; }
-    .btn  { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium shadow-sm bg-slate-900 text-white hover:bg-slate-800 active:scale-[.98]; }
-    .btn-sec { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 font-medium bg-slate-100 hover:bg-slate-200 text-slate-800; }
-    .tag { @apply text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600; }
-    .pill { @apply text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700; }
-    .mode-tab { @apply px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-100; }
-    .mode-tab.active { @apply bg-slate-900 text-white; }
-    .grid-bingo { display:grid; grid-template-columns: repeat(3, 1fr); gap:.5rem; }
-    .bingo-cell { @apply border rounded-xl p-3 text-sm bg-white hover:bg-indigo-50 cursor-pointer; min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; }
-    .bingo-cell.used { @apply bg-green-100 line-through; }
-    .kbd { @apply inline-block px-2 py-0.5 text-xs rounded border bg-slate-50; }
-    .drag { @apply select-none cursor-move; }
+    /* Minimal, Tailwind-free helpers so the app works even if Tailwind CDN/JIT misses classes */
+    .hidden{display:none !important;}
+    .card{border-radius:1rem;background:#ffffff;padding:1.5rem;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
+      padding:.5rem 1rem;font-weight:600;background:#0f172a;color:#fff;
+      box-shadow:0 1px 2px rgba(0,0,0,.1);}
+    .btn:hover{background:#1f2937;}
+    .btn:active{transform:scale(.98);}
+    .btn-sec{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
+      padding:.4rem .75rem;font-weight:500;background:#f1f5f9;color:#334155;}
+    .btn-sec:hover{background:#e2e8f0;}
+    .tag{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:#f1f5f9;color:#64748b;}
+    .pill{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:#eef2ff;color:#3730a3;}
+    .mode-tab{padding:.5rem .75rem;border-radius:.75rem;cursor:pointer;}
+    .mode-tab.active{background:#0f172a;color:#fff;}
+    .grid-bingo{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
+    .bingo-cell{border:1px solid #e2e8f0;border-radius:.75rem;padding:.75rem;font-size:.9rem;background:#fff;
+      min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;}
+    .bingo-cell.used{background:#dcfce7;text-decoration:line-through;}
+    .kbd{display:inline-block;padding:.125rem .5rem;font-size:.75rem;border-radius:.25rem;border:1px solid #e5e7eb;background:#f8fafc;}
+    .drag{user-select:none;cursor:move;}
   </style>
+
 </head>
 <body class="bg-slate-50 text-slate-900">
   <div class="max-w-6xl mx-auto p-4 sm:p-6">
@@ -256,19 +267,35 @@
     /***********************
      * STATE & STORAGE
      ***********************/
+    // Resilient storage shim (falls back to in-memory if localStorage is unavailable)
+    const __storage = (()=>{
+      try {
+        const t='__test__'+Math.random();
+        localStorage.setItem(t,'1'); localStorage.removeItem(t);
+        return localStorage;
+      } catch (e) {
+        const mem = {};
+        return {
+          getItem:(k)=> (k in mem ? mem[k] : null),
+          setItem:(k,v)=> { mem[k]=String(v) },
+          removeItem:(k)=> { delete mem[k] }
+        };
+      }
+    })();
+
     const LS = {
-      get known(){ return new Set(JSON.parse(localStorage.getItem('knownExpr')||'[]')); },
-      set knownSet(set){ localStorage.setItem('knownExpr', JSON.stringify([...set])); },
-      get points(){ return +localStorage.getItem('points')||0; },
-      set points(v){ localStorage.setItem('points', v); },
-      get last(){ return localStorage.getItem('lastPractice')||''; },
-      set last(s){ localStorage.setItem('lastPractice', s); },
-      get streak(){ return +localStorage.getItem('streak')||0; },
-      set streak(v){ localStorage.setItem('streak', v); },
-      get unlocked(){ return new Set(JSON.parse(localStorage.getItem('unlockedClusters')||'[]')); },
-      set unlockedSet(set){ localStorage.setItem('unlockedClusters', JSON.stringify([...set])); },
-      get dailyDone(){ return localStorage.getItem('dailyDone')===todayStr(); },
-      setDailyDone(){ localStorage.setItem('dailyDone', todayStr()); }
+      get known(){ return new Set(JSON.parse(__storage.getItem('knownExpr')||'[]')); },
+      set knownSet(set){ __storage.setItem('knownExpr', JSON.stringify([...set])); },
+      get points(){ return +__storage.getItem('points')||0; },
+      set points(v){ __storage.setItem('points', v); },
+      get last(){ return __storage.getItem('lastPractice')||''; },
+      set last(s){ __storage.setItem('lastPractice', s); },
+      get streak(){ return +__storage.getItem('streak')||0; },
+      set streak(v){ __storage.setItem('streak', v); },
+      get unlocked(){ return new Set(JSON.parse(__storage.getItem('unlockedClusters')||'[]')); },
+      set unlockedSet(set){ __storage.setItem('unlockedClusters', JSON.stringify([...set])); },
+      get dailyDone(){ return __storage.getItem('dailyDone')===todayStr(); },
+      setDailyDone(){ __storage.setItem('dailyDone', todayStr()); }
     };
 
     const CLUSTERS = (()=>{
@@ -458,7 +485,7 @@
       const group = document.createElement('div'); group.className='mt-3 grid sm:grid-cols-2 gap-2';
       opts.forEach(o=>{
         const b=document.createElement('button'); b.className='btn-sec text-left'; b.textContent=o.en; b.addEventListener('click', ()=>{
-          if(o.id===q.id){ b.classList.add('!bg-green-100'); addPoints(2); toast('Correct'); } else { b.classList.add('!bg-red-100'); shake(b); }
+          if(o.id===q.id){ b.classList.add('bg-green-100'); addPoints(2); toast('Correct'); } else { b.classList.add('bg-red-100'); shake(b); }
         }); group.appendChild(b);
       });
       box.appendChild(group);
@@ -496,7 +523,7 @@
       document.getElementById('promptTopic').textContent = topic;
       const cont = document.getElementById('promptExpr'); cont.innerHTML='';
       picked.forEach(p=>{
-        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('!bg-green-100'));
+        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('bg-green-100'));
         cont.appendChild(chip);
       });
       resetTimer();
@@ -641,8 +668,12 @@
       switchTo('flash');
     }
 
-    document.getElementById('tabs');
-    window.addEventListener('load', init);
+    
+    document.addEventListener('DOMContentLoaded', init);
   </script>
+
+  <!-- Tailwind safelist seed for dynamically-added classes -->
+  <div aria-hidden="true" class="hidden ring-2 ring-indigo-400 opacity-40 bg-green-100 bg-red-100 line-through"></div>
+
 </body>
 </html>
