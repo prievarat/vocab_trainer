@@ -6,32 +6,97 @@
   <title>Expressions Trainer</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <style>
-    /* Minimal, Tailwind-free helpers so the app works even if Tailwind CDN/JIT misses classes */
-    .hidden{display:none !important;}
-    .card{border-radius:1rem;background:#ffffff;padding:1.5rem;
-      box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);}
-    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
-      padding:.5rem 1rem;font-weight:600;background:#0f172a;color:#fff;
-      box-shadow:0 1px 2px rgba(0,0,0,.1);}
-    .btn:hover{background:#1f2937;}
-    .btn:active{transform:scale(.98);}
-    .btn-sec{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
-      padding:.4rem .75rem;font-weight:500;background:#f1f5f9;color:#334155;}
-    .btn-sec:hover{background:#e2e8f0;}
-    .tag{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:#f1f5f9;color:#64748b;}
-    .pill{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:#eef2ff;color:#3730a3;}
-    .mode-tab{padding:.5rem .75rem;border-radius:.75rem;cursor:pointer;}
-    .mode-tab.active{background:#0f172a;color:#fff;}
-    .grid-bingo{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
-    .bingo-cell{border:1px solid #e2e8f0;border-radius:.75rem;padding:.75rem;font-size:.9rem;background:#fff;
-      min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;}
-    .bingo-cell.used{background:#dcfce7;text-decoration:line-through;}
-    .kbd{display:inline-block;padding:.125rem .5rem;font-size:.75rem;border-radius:.25rem;border:1px solid #e5e7eb;background:#f8fafc;}
-    .drag{user-select:none;cursor:move;}
+    /* Minimal extras */
+    .card { @apply rounded-2xl shadow-lg p-6 bg-white; }
+    .btn  { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium shadow-sm bg-slate-900 text-white hover:bg-slate-800 active:scale-[.98]; }
+    .btn-sec { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 font-medium bg-slate-100 hover:bg-slate-200 text-slate-800; }
+    .tag { @apply text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600; }
+    .pill { @apply text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700; }
+    .mode-tab { @apply px-3 py-2 rounded-xl cursor-pointer hover:bg-slate-100; }
+    .mode-tab.active { @apply bg-slate-900 text-white; }
+    .grid-bingo { display:grid; grid-template-columns: repeat(3, 1fr); gap:.5rem; }
+    .bingo-cell { @apply border rounded-xl p-3 text-sm bg-white hover:bg-indigo-50 cursor-pointer; min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; }
+    .bingo-cell.used { @apply bg-green-100 line-through; }
+    .kbd { @apply inline-block px-2 py-0.5 text-xs rounded border bg-slate-50; }
+    .drag { @apply select-none cursor-move; }
   </style>
+<style id='fallback-tailwind'>
 
+/* ===== Minimal Tailwind-like fallback so design holds even if CDN fails ===== */
+/* Typography + base */
+body{font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,Arial,"Apple Color Emoji","Segoe UI Emoji"; color:#0f172a;}
+/* display/layout */
+.flex{display:flex}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}
+.flex-1{flex:1 1 0%}
+.grid{display:grid}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.items-center{align-items:center}.items-start{align-items:flex-start}
+.justify-between{justify-content:space-between}
+.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
+.space-y-1>*+*{margin-top:.25rem}.space-y-2>*+*{margin-top:.5rem}
+.space-y-3>*+*{margin-top:.75rem}.space-y-4>*+*{margin-top:1rem}
+/* sizing */
+.w-full{width:100%}.w-px{width:1px}.h-8{height:2rem}
+/* spacing */
+.p-4{padding:1rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}
+.py-1{padding-top:.25rem;padding-bottom:.25rem}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}
+.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.mb-2{margin-bottom:.5rem}
+.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}
+.mx-auto{margin-left:auto;margin-right:auto}.ml-auto{margin-left:auto}
+/* radius */
+.rounded-md{border-radius:.375rem}.rounded-lg{border-radius:.5rem}
+.rounded-xl{border-radius:.75rem}.rounded-2xl{border-radius:1rem}
+.rounded-full{border-radius:9999px}
+/* borders & backgrounds & colors */
+.border{border:1px solid #e2e8f0}
+.bg-slate-50{background:#f8fafc}.bg-slate-200{background:#e2e8f0}
+.bg-indigo-50{background:#eef2ff}
+.bg-green-100{background:#dcfce7}.bg-red-100{background:#fee2e2}
+.text-slate-500{color:#64748b}.text-slate-600{color:#475569}
+.text-slate-700{color:#334155}.text-slate-900{color:#0f172a}
+.text-center{text-align:center}.text-right{text-align:right}
+.text-xs{font-size:.75rem;line-height:1rem}
+.text-sm{font-size:.875rem;line-height:1.25rem}
+.text-lg{font-size:1.125rem;line-height:1.75rem}
+.text-xl{font-size:1.25rem;line-height:1.75rem}
+.text-2xl{font-size:1.5rem;line-height:2rem}
+.uppercase{text-transform:uppercase}.tracking-wider{letter-spacing:.05em}
+.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
+.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+/* utilities */
+.hidden{display:none}.cursor-pointer{cursor:pointer}.overflow-auto{overflow:auto}
+.line-through{text-decoration:line-through}
+.opacity-40{opacity:.4}
+.ring-2{outline:2px solid currentColor; outline-offset:2px}
+.ring-indigo-400{color:#818cf8; outline-color:#818cf8}
+/* components used in the app */
+.card{border-radius:1rem;background:#fff;padding:1.5rem;
+  box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
+  padding:.5rem 1rem;font-weight:600;background:#0f172a;color:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.btn:hover{background:#1f2937}.btn:active{transform:scale(.98)}
+.btn-sec{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;
+  padding:.4rem .75rem;font-weight:500;background:#f1f5f9;color:#334155}
+.btn-sec:hover{background:#e2e8f0}
+.mode-tab{padding:.5rem .75rem;border-radius:.75rem;cursor:pointer}
+.mode-tab.active{background:#0f172a;color:#fff}
+.pill{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:#eef2ff;color:#3730a3}
+/* responsive sm: */
+@media (min-width:640px){
+  .sm\:p-6{padding:1.5rem}
+  .sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}
+  .sm\:flex-row{flex-direction:row}
+  .sm\:items-end{align-items:flex-end}
+  .sm\:justify-between{justify-content:space-between}
+  .sm\:w-64{width:16rem}
+  .sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+</style>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <div class="max-w-6xl mx-auto p-4 sm:p-6">
@@ -267,35 +332,19 @@
     /***********************
      * STATE & STORAGE
      ***********************/
-    // Resilient storage shim (falls back to in-memory if localStorage is unavailable)
-    const __storage = (()=>{
-      try {
-        const t='__test__'+Math.random();
-        localStorage.setItem(t,'1'); localStorage.removeItem(t);
-        return localStorage;
-      } catch (e) {
-        const mem = {};
-        return {
-          getItem:(k)=> (k in mem ? mem[k] : null),
-          setItem:(k,v)=> { mem[k]=String(v) },
-          removeItem:(k)=> { delete mem[k] }
-        };
-      }
-    })();
-
     const LS = {
-      get known(){ return new Set(JSON.parse(__storage.getItem('knownExpr')||'[]')); },
-      set knownSet(set){ __storage.setItem('knownExpr', JSON.stringify([...set])); },
-      get points(){ return +__storage.getItem('points')||0; },
-      set points(v){ __storage.setItem('points', v); },
-      get last(){ return __storage.getItem('lastPractice')||''; },
-      set last(s){ __storage.setItem('lastPractice', s); },
-      get streak(){ return +__storage.getItem('streak')||0; },
-      set streak(v){ __storage.setItem('streak', v); },
-      get unlocked(){ return new Set(JSON.parse(__storage.getItem('unlockedClusters')||'[]')); },
-      set unlockedSet(set){ __storage.setItem('unlockedClusters', JSON.stringify([...set])); },
-      get dailyDone(){ return __storage.getItem('dailyDone')===todayStr(); },
-      setDailyDone(){ __storage.setItem('dailyDone', todayStr()); }
+      get known(){ return new Set(JSON.parse(localStorage.getItem('knownExpr')||'[]')); },
+      set knownSet(set){ localStorage.setItem('knownExpr', JSON.stringify([...set])); },
+      get points(){ return +localStorage.getItem('points')||0; },
+      set points(v){ localStorage.setItem('points', v); },
+      get last(){ return localStorage.getItem('lastPractice')||''; },
+      set last(s){ localStorage.setItem('lastPractice', s); },
+      get streak(){ return +localStorage.getItem('streak')||0; },
+      set streak(v){ localStorage.setItem('streak', v); },
+      get unlocked(){ return new Set(JSON.parse(localStorage.getItem('unlockedClusters')||'[]')); },
+      set unlockedSet(set){ localStorage.setItem('unlockedClusters', JSON.stringify([...set])); },
+      get dailyDone(){ return localStorage.getItem('dailyDone')===todayStr(); },
+      setDailyDone(){ localStorage.setItem('dailyDone', todayStr()); }
     };
 
     const CLUSTERS = (()=>{
@@ -485,7 +534,7 @@
       const group = document.createElement('div'); group.className='mt-3 grid sm:grid-cols-2 gap-2';
       opts.forEach(o=>{
         const b=document.createElement('button'); b.className='btn-sec text-left'; b.textContent=o.en; b.addEventListener('click', ()=>{
-          if(o.id===q.id){ b.classList.add('bg-green-100'); addPoints(2); toast('Correct'); } else { b.classList.add('bg-red-100'); shake(b); }
+          if(o.id===q.id){ b.classList.add('!bg-green-100'); addPoints(2); toast('Correct'); } else { b.classList.add('!bg-red-100'); shake(b); }
         }); group.appendChild(b);
       });
       box.appendChild(group);
@@ -523,7 +572,7 @@
       document.getElementById('promptTopic').textContent = topic;
       const cont = document.getElementById('promptExpr'); cont.innerHTML='';
       picked.forEach(p=>{
-        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('bg-green-100'));
+        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('!bg-green-100'));
         cont.appendChild(chip);
       });
       resetTimer();
@@ -668,12 +717,8 @@
       switchTo('flash');
     }
 
-    
-    document.addEventListener('DOMContentLoaded', init);
+    document.getElementById('tabs');
+    window.addEventListener('load', init);
   </script>
-
-  <!-- Tailwind safelist seed for dynamically-added classes -->
-  <div aria-hidden="true" class="hidden ring-2 ring-indigo-400 opacity-40 bg-green-100 bg-red-100 line-through"></div>
-
 </body>
 </html>
