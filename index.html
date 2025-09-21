@@ -1,245 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Expressions Trainer</title>
-
-  <!-- (Opcionális) Tailwind CDN: ha betölt, minden Tailwind-osztály él;
-       ha nem, a fallback CSS így is teljes dizájnt ad. -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- 100% Tailwind-mentes, önálló stílusok a biztos megjelenéshez -->
-  <style>
-    /* ===== Alap tipográfia ===== */
-    :root { --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-500:#64748b; --slate-600:#475569; --slate-700:#334155; --slate-900:#0f172a;
-            --indigo-50:#eef2ff; --indigo-500:#6366f1; --indigo-700:#3730a3; --green-100:#dcfce7; --red-100:#fee2e2; }
-    html,body{height:100%}
-    body{margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";
-         background:var(--slate-50); color:var(--slate-900);}
-    /* ===== Gyakran használt utilok (Tailwind nélkül is) ===== */
-    .max-w-6xl{max-width:72rem} .mx-auto{margin-left:auto;margin-right:auto}
-    .p-3{padding:.75rem} .p-4{padding:1rem} .p-6{padding:1.5rem} .px-2{padding-left:.5rem;padding-right:.5rem}
-    .py-1{padding-top:.25rem;padding-bottom:.25rem} .mt-1{margin-top:.25rem} .mt-2{margin-top:.5rem}
-    .mt-3{margin-top:.75rem} .mt-4{margin-top:1rem} .mt-5{margin-top:1.25rem} .mb-5{margin-bottom:1.25rem}
-    .gap-2{gap:.5rem} .gap-3{gap:.75rem} .gap-4{gap:1rem}
-    .text-xs{font-size:.75rem;line-height:1rem} .text-sm{font-size:.875rem;line-height:1.25rem}
-    .text-lg{font-size:1.125rem;line-height:1.75rem} .text-xl{font-size:1.25rem;line-height:1.75rem}
-    .text-2xl{font-size:1.5rem;line-height:2rem} .font-semibold{font-weight:600} .font-bold{font-weight:700}
-    .text-slate-500{color:var(--slate-500)} .text-slate-600{color:var(--slate-600)}
-    .text-slate-700{color:var(--slate-700)} .text-slate-900{color:var(--slate-900)}
-    .bg-white{background:#fff} .bg-slate-50{background:var(--slate-50)} .bg-slate-100{background:var(--slate-100)}
-    .bg-indigo-50{background:var(--indigo-50)} .bg-green-100{background:var(--green-100)} .bg-red-100{background:var(--red-100)}
-    .border{border:1px solid var(--slate-200)} .rounded-xl{border-radius:.75rem} .rounded-2xl{border-radius:1rem}
-    .shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)}
-    .flex{display:flex} .flex-col{flex-direction:column} .items-center{align-items:center}
-    .items-start{align-items:flex-start} .justify-between{justify-content:space-between} .flex-wrap{flex-wrap:wrap}
-    .w-px{width:1px} .h-8{height:2rem} .text-center{text-align:center}
-    .grid{display:grid} .grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
-    .cursor-pointer{cursor:pointer} .hidden{display:none} .line-through{text-decoration:line-through}
-    .w-full{width:100%} .h-2{height:.5rem}
-    .bg-indigo-500{background:var(--indigo-500)} .text-indigo-700{color:var(--indigo-700)}
-    .font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-    .select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}
-
-    /* Responsív részletek (sm:) */
-    @media (min-width:640px){
-      .sm\:p-6{padding:1.5rem}
-      .sm\:flex-row{flex-direction:row}
-      .sm\:items-end{align-items:flex-end}
-      .sm\:justify-between{justify-content:space-between}
-      .sm\:w-64{width:16rem}
-      .sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}
-    }
-
-    /* ===== Komponensek (Tailwind helyett kézzel) ===== */
-    .card{background:#fff;border-radius:1rem;padding:1.5rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;padding:.5rem 1rem;
-         font-weight:600;background:var(--slate-900);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1);transition:.1s}
-    .btn:hover{filter:brightness(1.05)} .btn:active{transform:scale(.98)}
-    .btn-sec{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;padding:.4rem .75rem;
-             font-weight:500;background:var(--slate-100);color:var(--slate-700)}
-    .btn-sec:hover{background:var(--slate-200)}
-    .tag{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:var(--slate-100);color:var(--slate-600)}
-    .pill{font-size:.75rem;padding:.125rem .5rem;border-radius:9999px;background:var(--indigo-50);color:var(--indigo-700)}
-    .mode-tab{padding:.5rem .75rem;border-radius:.75rem;cursor:pointer}
-    .mode-tab.active{background:var(--slate-900);color:#fff}
-
-    /* ===== Bingo rács ===== */
-    .grid-bingo{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
-    .bingo-cell{border:1px solid var(--slate-200);border-radius:.75rem;padding:.75rem;font-size:.875rem;background:#fff;
-      min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer}
-    .bingo-cell.used{background:var(--green-100);text-decoration:line-through}
-
-    /* ===== Kisegítő elemek ===== */
-    .kbd{display:inline-block;padding:.125rem .5rem;font-size:.75rem;border-radius:.25rem;border:1px solid var(--slate-200);background:var(--slate-50)}
-    .toast{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);background:var(--slate-900);color:#fff;
-           padding:.5rem 1rem;border-radius:.75rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1)}
-    .progress-bar{width:100%;height:.5rem;background:var(--slate-100);border-radius:9999px}
-    .progress-fill{height:.5rem;background:var(--indigo-500);border-radius:9999px}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Expressions Trainer – HU ⇄ EN (v3)</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb;
+    --primary:#2563eb; --primary-2:#1d4ed8; --ok:#16a34a; --bad:#dc2626;
+    --warn:#d97706; --card:#0b1220; --border:#22304b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
+       background:linear-gradient(180deg,#0b1020 0%,#0f172a 100%);}
+  a{color:#93c5fd}
+  .container{max-width:1100px;margin:0 auto;padding:16px}
+  header{padding:12px 0 8px 0}
+  h1{font-size:22px;margin:0 0 8px 0}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .select,.btn,input[type="text"],textarea{background:var(--panel);color:var(--text);border:1px solid var(--border);
+    border-radius:10px;padding:10px 12px;font-size:14px}
+  .btn{cursor:pointer;user-select:none}
+  .btn.primary{background:var(--primary);border-color:transparent}
+  .btn.primary:hover{background:var(--primary-2)}
+  .btn.ghost{background:transparent;border-color:var(--border)}
+  .btn.ok{background:var(--ok);border-color:transparent}
+  .btn.bad{background:var(--bad);border-color:transparent}
+  .btn.warn{background:var(--warn);border-color:transparent}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px 0}
+  .tab{padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);cursor:pointer}
+  .tab.active{background:var(--primary);border-color:transparent}
+  .panel{display:none;background:rgba(17,24,39,.5);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px}
+  .panel.active{display:block}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .between{display:flex;justify-content:space-between;align-items:center}
+  .grow{flex:1}
+  .muted{color:var(--muted)}
+  .pill{background:#111827;border:1px solid var(--border);border-radius:14px;padding:4px 10px;font-size:12px}
+  .grid{display:grid;gap:10px}
+  .card{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:18px;min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .small{font-size:12px}
+  .center{text-align:center}
+  .hidden{display:none !important}
+  .columns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .item{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--panel);cursor:pointer;min-height:52px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .item.selected{outline:2px solid var(--primary)}
+  .item.correct{background:#0b3b1e;border-color:#155e2e}
+  .item.wrong{background:#4a1010;border-color:#7f1d1d}
+  .qf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .tile{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel);cursor:pointer;min-height:72px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .tile.hit{background:#0b3b1e;border-color:#155e2e}
+  .tile.miss{animation:shake .2s both}
+  @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+  .timer{font-variant-numeric:tabular-nums;font-size:20px}
+  .mono{font-variant-numeric:tabular-nums;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace}
+  .sep{height:1px;background:var(--border);margin:10px 0}
+  .prompt{padding:14px;border-radius:10px;background:var(--panel);border:1px solid var(--border);text-align:center}
+  .chip{display:inline-block;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#0f1a30;margin:4px 4px 0 0;font-size:13px;cursor:pointer;user-select:none}
+  .chip.used{text-decoration:line-through;opacity:.6}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <div class="max-w-6xl mx-auto p-4 sm:p-6">
-    <header class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold">Expressions Trainer</h1>
-        <p class="text-sm text-slate-600">44 célkifejezés aktív, játékos beépítéséhez (EN↔HU)</p>
+<body>
+<div class="container">
+  <header>
+    <h1>Expressions Trainer (HU ⇄ EN) — v3</h1>
+    <div class="bar">
+      <label>Oldal:
+        <select id="side" class="select">
+          <option value="hu-en">HU → EN</option>
+          <option value="en-hu">EN → HU</option>
+        </select>
+      </label>
+      <label>Klaszter:
+        <select id="cluster" class="select">
+          <option value="all">All</option>
+        </select>
+      </label>
+      <button id="resetKnownCluster" class="btn warn">Reset known for this cluster</button>
+      <span class="pill">Billentyűk: <span class="muted">F=Flip, K=I know, R=Next</span></span>
+      <span class="muted small">Adatok helyi tárolóban (LocalStorage)</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <div class="tab active" data-tab="flash">Flashcards</div>
+    <div class="tab" data-tab="matching">Matching</div>
+    <div class="tab" data-tab="mc">Multiple Choice</div>
+    <div class="tab" data-tab="transform">Transformation</div>
+    <div class="tab" data-tab="speaking">Prompted Speaking</div>
+    <div class="tab" data-tab="quick">Quick Fire / Bingo</div>
+    <div class="tab" data-tab="progress">Progress</div>
+  </nav>
+
+  <!-- Flashcards -->
+  <section class="panel active" id="panel-flash">
+    <div class="between">
+      <div class="muted">Aktív pakli: <span id="flash-count">0</span> kártya</div>
+      <div class="muted">Ismert kártyák a klaszterben: <span id="known-count">0</span></div>
+    </div>
+    <div id="flash-card" class="card" style="min-height:120px;margin:12px 0;">
+      <div class="grow center">
+        <div id="flash-front" style="font-size:22px;font-weight:600">—</div>
+        <div id="flash-back" class="hidden" style="margin-top:8px;font-size:18px;color:#cbd5e1">—</div>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="card p-3 flex items-center gap-3"><!-- !p-3 → p-3 -->
-          <div class="text-center">
-            <div class="text-xs text-slate-500">Pontok</div>
-            <div id="points" class="text-xl font-semibold">0</div>
-          </div>
-          <div class="w-px h-8" style="background:var(--slate-200)"></div>
-          <div class="text-center">
-            <div class="text-xs text-slate-500">Napi sorozat</div>
-            <div id="streak" class="text-xl font-semibold">0</div>
-          </div>
-          <div class="w-px h-8" style="background:var(--slate-200)"></div>
-          <div class="text-center">
-            <div class="text-xs text-slate-500">Ismert kártyák</div>
-            <div id="knownCount" class="text-xl font-semibold">0</div>
-          </div>
-        </div>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="flash-flip">Flip (F)</button>
+      <button class="btn ok" id="flash-know">I know (K)</button>
+      <button class="btn ghost" id="flash-keep">Still studying</button>
+      <button class="btn" id="flash-next">Next (R)</button>
+    </div>
+  </section>
+
+  <!-- Matching -->
+  <section class="panel" id="panel-matching">
+    <div class="muted small">Párosítsd a megfelelőket. 6 pár / kör.</div>
+    <div class="columns" style="margin:12px 0;">
+      <div id="match-left" class="col"></div>
+      <div id="match-right" class="col"></div>
+    </div>
+    <div class="row">
+      <button id="match-reset" class="btn">Újrakezd</button>
+      <button id="match-next" class="btn primary">Új kör</button>
+      <span class="pill">Helyes: <span id="match-correct">0</span></span>
+      <span class="pill">Hibák: <span id="match-wrong">0</span></span>
+    </div>
+  </section>
+
+  <!-- Multiple Choice -->
+  <section class="panel" id="panel-mc">
+    <div class="prompt" id="mc-prompt">—</div>
+    <div class="grid" id="mc-answers" style="grid-template-columns:repeat(2,1fr);margin-top:10px"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="mc-next" class="btn primary">Következő</button>
+      <span class="pill">Helyes: <span id="mc-correct">0</span></span>
+      <span class="pill">Összes: <span id="mc-total">0</span></span>
+    </div>
+  </section>
+
+  <!-- Transformation -->
+  <section class="panel" id="panel-transform">
+    <div class="prompt" id="tr-prompt">—</div>
+    <div class="row" style="margin-top:10px">
+      <input type="text" id="tr-input" class="grow" placeholder="Írd be a fordítást…" />
+      <button id="tr-check" class="btn primary">Ellenőrzés</button>
+      <button id="tr-next" class="btn">Következő</button>
+    </div>
+    <div id="tr-feedback" class="muted" style="margin-top:8px"></div>
+  </section>
+
+  <!-- Prompted Speaking -->
+  <section class="panel" id="panel-speaking">
+    <div class="between">
+      <div class="prompt grow" id="sp-prompt">—</div>
+      <div class="row" style="min-width:210px; margin-left:10px">
+        <button id="sp-start" class="btn primary">Start 60s</button>
+        <button id="sp-stop" class="btn">Stop</button>
+        <div class="pill"><span class="muted">⏱</span> <span id="sp-timer" class="mono">60</span></div>
       </div>
-    </header>
+    </div>
+    <div id="sp-exprs" class="muted small center" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="sp-done" class="btn ok">Elmondtam</button>
+      <button id="sp-next" class="btn">Új kártya</button>
+    </div>
+    <div id="sp-tip" class="muted small" style="margin-top:8px">
+      Feladat: válaszolj a kérdésre / teljesítsd az utasítást, és <b>használj 3 megadott kifejezést</b> a válaszodban. (Kattints a kifejezésekre, ha <u>felhasználtad</u> – áthúzza. Billentyűk: 1–3.)
+    </div>
+  </section>
 
-    <!-- Napi kihívás -->
-    <section class="card mb-5" id="dailyBox">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-xs uppercase tracking-wider text-slate-500">Napi kihívás</div>
-          <div id="dailyText" class="text-lg font-semibold"></div>
-          <div class="mt-1 text-sm text-slate-600">Mondj egy rövid mondatot ezzel a kifejezéssel. Jelöld készre, ha elmondtad.</div>
-          <button id="btnDailyDone" class="btn-sec mt-3">Kihívás teljesítve</button>
-        </div>
-        <div class="text-right">
-          <span id="clusterStatus" class="pill"></span>
-        </div>
+  <!-- Quick Fire / Bingo -->
+  <section class="panel" id="panel-quick">
+    <div class="between">
+      <div class="row">
+        <button id="qf-start" class="btn primary">Start (60s)</button>
+        <span class="pill">Pont: <span id="qf-score">0</span></span>
+        <span class="pill">Találat: <span id="qf-hits">0</span>/12</span>
       </div>
-    </section>
+      <div class="timer" id="qf-timer">60</div>
+    </div>
+    <div class="prompt" id="qf-prompt" style="margin-top:10px">Kezdéshez kattints a Start gombra.</div>
+    <div class="qf-grid" id="qf-grid" style="margin-top:12px"></div>
+  </section>
 
-    <!-- Fülek -->
-    <nav class="flex flex-wrap gap-2 mb-4" id="tabs">
-      <button class="mode-tab active" data-mode="flash">Flashcards</button>
-      <button class="mode-tab" data-mode="match">Matching</button>
-      <button class="mode-tab" data-mode="mcq">Multiple Choice</button>
-      <button class="mode-tab" data-mode="transform">Transformation</button>
-      <button class="mode-tab" data-mode="prompt">Prompted Speaking</button>
-      <button class="mode-tab" data-mode="bingo">Quick Fire / Bingo</button>
-      <button class="mode-tab" data-mode="progress">Progress</button>
-      <span class="ml-auto text-sm text-slate-500">Tippek: <span class="kbd">R</span> újratölt / <span class="kbd">F</span> flip / <span class="kbd">K</span> I know</span>
-    </nav>
+  <!-- Progress -->
+  <section class="panel" id="panel-progress">
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+      <div class="card"><div><div class="muted small">Ismert kártyák (összes)</div><div id="pg-known" style="font-size:22px" class="mono">0</div></div></div>
+      <div class="card"><div><div class="muted small">Flashcards – megtekintve</div><div id="pg-flash" style="font-size:22px" class="mono">0</div></div></div>
+      <div class="card"><div><div class="muted small">Matching – helyes/hibás</div><div id="pg-match" style="font-size:22px" class="mono">0 / 0</div></div></div>
+      <div class="card"><div><div class="muted small">Multiple Choice – helyes/összes</div><div id="pg-mc" style="font-size:22px" class="mono">0 / 0</div></div></div>
+      <div class="card"><div><div class="muted small">Quick Fire – rekord pont</div><div id="pg-qf" style="font-size:22px" class="mono">0</div></div></div>
+    </div>
+    <div class="sep"></div>
+    <div id="pg-clusters"></div>
+  </section>
 
-    <!-- Nézetek -->
-    <main id="views" class="space-y-4">
-      <!-- FLASHCARDS -->
-      <section id="view-flash" class="card">
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="flex-1">
-            <div class="flex items-center justify-between">
-              <div class="text-sm text-slate-500">Aktív pakli: <span id="flashCount">0</span> kártya</div>
-              <div class="flex items-center gap-2">
-                <label class="text-sm">Oldal:
-                  <select id="flashSide" class="border rounded-xl px-2 py-1 text-sm">
-                    <option value="hu">HU → EN</option>
-                    <option value="en">EN → HU</option>
-                  </select>
-                </label>
-                <label class="text-sm">Klaszter:
-                  <select id="clusterFilter" class="border rounded-xl px-2 py-1 text-sm"></select>
-                </label>
-              </div>
-            </div>
-            <div id="flashCard" class="mt-4 border rounded-2xl p-6 bg-indigo-50 cursor-pointer">
-              <div id="flashFront" class="text-xl font-semibold"></div>
-              <div id="flashBack" class="mt-2 text-slate-700 hidden"></div>
-            </div>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <button id="btnFlip" class="btn">Flip (F)</button>
-              <button id="btnIKnow" class="btn-sec">I know (K)</button>
-              <button id="btnKeep" class="btn-sec">Still studying</button>
-              <button id="btnNext" class="btn-sec">Next (R)</button>
-              <button id="btnResetKnown" class="btn-sec">Reset known for this cluster</button>
-            </div>
-          </div>
-          <aside class="w-full sm:w-64">
-            <div class="text-sm mb-2">Ismert kártyák ebben a klaszterben</div>
-            <ul id="knownList" class="text-sm space-y-1" style="max-height:16rem;overflow:auto"></ul>
-          </aside>
-        </div>
-      </section>
+  <footer class="muted small center">Egyfájlos verzió. Ha saját 44 kifejezésed van, szerkeszd a kód tetején a „DATA_FALLBACK” tömböt, vagy hagyd meg az eredeti INV/EXPRESSIONS tömböt – a program felismeri.</footer>
+</div>
 
-      <!-- MATCHING -->
-      <section id="view-match" class="card hidden">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-slate-600">Párosítsd az 5 kifejezést (HU ↔ EN). Kattints egy HU elemre, majd a párjára.</div>
-          <button id="btnNewMatch" class="btn-sec">Új készlet</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" id="matchGrid"></div>
-        <div id="matchMsg" class="mt-3 text-sm"></div>
-      </section>
-
-      <!-- MCQ -->
-      <section id="view-mcq" class="card hidden">
-        <div class="text-sm text-slate-600">Válaszd ki, melyik jelentése illik a kiemelt kifejezéshez.</div>
-        <div class="mt-3" id="mcqBox"></div>
-        <div class="mt-3 flex gap-2">
-          <button id="btnNewMcq" class="btn-sec">Új kérdés</button>
-        </div>
-      </section>
-
-      <!-- TRANSFORMATION -->
-      <section id="view-transform" class="card hidden">
-        <div class="text-sm text-slate-600">Írd át a mondatot a célkifejezés használatával. (Részben szabad megoldás, több jó válasz lehetséges.)</div>
-        <div class="mt-3 space-y-3" id="transformBox"></div>
-        <div class="mt-2"><button id="btnNewTransform" class="btn-sec">Új feladat</button></div>
-      </section>
-
-      <!-- PROMPTED SPEAKING -->
-      <section id="view-prompt" class="card hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-slate-600">Mondd el 45–60 másodpercben. Pipáld ki, amit használtál.</div>
-            <div id="promptTopic" class="text-lg font-semibold mt-1"></div>
-          </div>
-          <div class="text-sm"><span id="promptTimer" class="font-mono">00:60</span></div>
-        </div>
-        <div id="promptExpr" class="mt-3 flex flex-wrap gap-2"></div>
-        <div class="mt-3 flex gap-2">
-          <button id="btnStartPrompt" class="btn">Start</button>
-          <button id="btnNewPrompt" class="btn-sec">Új téma</button>
-        </div>
-      </section>
-
-      <!-- BINGO -->
-      <section id="view-bingo" class="card hidden">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-slate-600">Cél: mind a 9 kifejezést használd beszélgetés közben. Kattints, ha használtad.</div>
-          <button id="btnNewBingo" class="btn-sec">Új tábla</button>
-        </div>
-        <div id="bingoGrid" class="grid-bingo mt-3"></div>
-      </section>
-
-      <!-- PROGRESS -->
-      <section id="view-progress" class="card hidden">
-        <h2 class="font-semibold mb-2">Haladás és feloldások</h2>
-        <div id="progressList" class="space-y-2"></div>
-        <div class="mt-4 text-sm text-slate-600">Feloldási szabály: egy klaszter újként elérhető, ha az előzőben az elemek ≥ 70%-át „I know” jelölted.</div>
-      </section>
-    </main>
-
-    <footer class="text-center text-xs text-slate-500 mt-5">
-      Made for classroom use • Stores progress locally in your browser • v1.0
-    </footer>
-  </div>
-
-  <script>
-    /*************** DATA ***************/
-    const EXPRESSIONS = [
+<script>
+/* =====================
+   1) DATA HANDLING
+===================== */
+const DATA_FALLBACK = [
       {id:'e1',  en:"I’m not sure what/where/why exactly.", hu:"nem tudom, pontosan mit/hol/miért …", cluster:"opinions"},
       {id:'e2',  en:"His main interest is …", hu:"fő érdeklődési köre …", cluster:"family"},
       {id:'e3',  en:"A lot of people get divorced and live on their own, and bring up their children on their own.", hu:"Sokan elválnak, egyedül élnek, és a gyerekeiket is egyedül nevelik.", cluster:"family"},
@@ -286,364 +251,309 @@
       {id:'e44', en:"So they say.", hu:"Legalábbis ezt mondják.", cluster:"fillers"},
     ];
 
-    const SPEAKING_TOPICS = [
-      "Tell me about your family and childhood.",
-      "Describe someone in your family.",
-      "Talk about changes in your life.",
-      "Share a story about a trip or plan.",
-      "What is your daily routine like nowadays?",
-      "What are your hopes and dreams about relationships?",
-    ];
 
-    const TRANSFORMS = [
-      {src:"He works as a driver.", must:"for a living", targetExample:"He drives for a living."},
-      {src:"I don’t remember much about my grandmother.", must:"vague memories", targetExample:"I only have very vague memories of my grandmother."},
-      {src:"To be honest, I think he isn’t very friendly.", must:"I would say", targetExample:"I would say that he isn’t very sociable."},
-      {src:"We are similar in many ways.", must:"in common", targetExample:"We have a lot of things in common."},
-      {src:"She usually cooks.", must:"seems to spend", targetExample:"She seems to spend half of her life in the kitchen."},
-      {src:"After that, everything changed.", must:"never really the same", targetExample:"Things were never really the same after that."},
-      {src:"People say it’s true.", must:"so they say", targetExample:"It’s true, so they say."},
-      {src:"Usually, we have a happy atmosphere.", must:"mostly very happy", targetExample:"The family atmosphere is mostly very happy."},
-    ];
+function normalizeData(raw){
+  return raw.map((x, idx)=>{
+    const hu=x.hu ?? x.HU ?? x.huText ?? x.hungarian ?? "";
+    const en=x.en ?? x.EN ?? x.enText ?? x.english ?? "";
+    const cluster=x.cluster ?? x.topic ?? "general";
+    const id=String(x.id ?? idx+1);
+    return {id, cluster, hu:String(hu).trim(), en:String(en).trim()};
+  }).filter(x=>x.hu && x.en);
+}
 
-    /*************** STATE ***************/
-    const LS = {
-      get known(){ return new Set(JSON.parse(localStorage.getItem('knownExpr')||'[]')); },
-      set knownSet(set){ localStorage.setItem('knownExpr', JSON.stringify([...set])); },
-      get points(){ return +localStorage.getItem('points')||0; },
-      set points(v){ localStorage.setItem('points', v); },
-      get last(){ return localStorage.getItem('lastPractice')||''; },
-      set last(s){ localStorage.setItem('lastPractice', s); },
-      get streak(){ return +localStorage.getItem('streak')||0; },
-      set streak(v){ localStorage.setItem('streak', v); },
-      get unlocked(){ return new Set(JSON.parse(localStorage.getItem('unlockedClusters')||'[]')); },
-      set unlockedSet(set){ localStorage.setItem('unlockedClusters', JSON.stringify([...set])); },
-      get dailyDone(){ return localStorage.getItem('dailyDone')===todayStr(); },
-      setDailyDone(){ localStorage.setItem('dailyDone', todayStr()); }
-    };
+const RAW=(window.EXPRESSIONS || window.INV || window.CARDS || window.DATA || DATA_FALLBACK);
+const DATA=normalizeData(RAW);
+const CLUSTERS=Array.from(new Set(DATA.map(d=>d.cluster))).sort();
 
-    const CLUSTERS = (()=>{
-      const map = new Map();
-      EXPRESSIONS.forEach(e=>{
-        if(!map.has(e.cluster)) map.set(e.cluster, []);
-        map.get(e.cluster).push(e);
-      });
-      return map;
-    })();
+/* =====================
+   2) STATE & STORAGE
+===================== */
+const LS={ get(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):(def??null);}catch(e){return def??null;}},
+           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}, };
+const SKEY={ known:(c)=>`expr_known_${c||'all'}`, stats:'expr_stats_v3' };
+const STATS=LS.get(SKEY.stats,{ flashSeen:0, mc:{correct:0,total:0}, match:{correct:0,wrong:0}, qf:{best:0} });
 
-    (function initUnlock(){
-      const defaultOpen = ['family','opinions'];
-      const set = LS.unlocked; defaultOpen.forEach(c=>set.add(c)); LS.unlockedSet = set;
-    })();
+/* =====================
+   3) HELPERS
+===================== */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function sample(arr,n){ if(n>=arr.length) return shuffle(arr.slice()); const c=shuffle(arr.slice()); return c.slice(0,n); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+const sideSel=()=>document.getElementById('side').value;
+const clusterSel=()=>document.getElementById('cluster').value;
+function byCluster(list){ const c=clusterSel(); return c==='all'? list.slice() : list.filter(x=>x.cluster===c); }
+function getKnownSet(c){ return new Set(LS.get(SKEY.known(c), [])); }
+function setKnownSet(c,set){ LS.set(SKEY.known(c), Array.from(set)); }
+function addKnown(id){ const c=clusterSel(); const s=getKnownSet(c); s.add(id); setKnownSet(c,s); refreshKnownCount(); }
+function refreshKnownCount(){ const c=clusterSel(); document.getElementById('known-count').textContent=getKnownSet(c).size; }
+function saveStats(){ LS.set(SKEY.stats, STATS); }
+function norm(s){ return String(s).trim().toLowerCase(); }
 
-    function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+/* =====================
+   4) INIT CONTROLS
+===================== */
+const clusterSelect=document.getElementById('cluster');
+CLUSTERS.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; clusterSelect.appendChild(o); });
+document.getElementById('resetKnownCluster').addEventListener('click', ()=>{
+  setKnownSet(clusterSel(), new Set());
+  flashBuildDeck(); matchNewRound(); mcNext(); trNext(); spNext(); qfSetup(); renderProgress();
+});
 
-    function updateStreak(){
-      const last = LS.last, today = todayStr();
-      if(last!==today){
-        if(last){
-          const y = new Date(last), t = new Date(today);
-          const diff = Math.round((t - y)/(1000*3600*24));
-          LS.streak = (diff===1) ? (LS.streak + 1) : 1;
-        } else { LS.streak = 1; }
-        LS.last = today;
-      }
-      document.getElementById('streak').textContent = LS.streak;
+/* =====================
+   5) TABS
+===================== */
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const t=e.target.closest('.tab'); if(!t) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  const id=t.dataset.tab;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='progress') renderProgress();
+});
+
+/* =====================
+   6) FLASHCARDS
+===================== */
+let flashDeck=[], flashIdx=0, flashFlipped=false;
+function flashBuildDeck(){
+  const items=byCluster(DATA);
+  const known=getKnownSet(clusterSel());
+  flashDeck=shuffle(items.filter(x=>!known.has(x.id)));
+  flashIdx=0; flashFlipped=false; renderFlash();
+}
+function renderFlash(){
+  const front=document.getElementById('flash-front');
+  const back=document.getElementById('flash-back');
+  document.getElementById('flash-count').textContent=flashDeck.length;
+  refreshKnownCount();
+  if(!flashDeck.length){
+    front.textContent='Ebben a klaszterben minden kártyát ismertnek jelöltél. (Használd a Reset gombot, ha újrakezdenéd.)';
+    back.classList.add('hidden'); back.textContent=''; return;
+  }
+  const side=sideSel();
+  const e=flashDeck[flashIdx % flashDeck.length];
+  front.textContent = side==='hu-en'? e.hu : e.en;
+  back.textContent  = side==='hu-en'? e.en : e.hu;
+  back.classList.toggle('hidden', !flashFlipped);
+}
+function nextFlash(){ if(!flashDeck.length){renderFlash();return;} flashIdx=(flashIdx+1)%flashDeck.length; flashFlipped=false; STATS.flashSeen++; saveStats(); renderFlash(); }
+function flashKnow(){ if(!flashDeck.length) return; addKnown(flashDeck[flashIdx].id); flashDeck.splice(flashIdx,1); if(flashIdx>=flashDeck.length) flashIdx=0; flashFlipped=false; renderFlash(); }
+document.getElementById('flash-flip').addEventListener('click', ()=>{ flashFlipped=!flashFlipped; renderFlash(); });
+document.getElementById('flash-know').addEventListener('click', flashKnow);
+document.getElementById('flash-keep').addEventListener('click', nextFlash);
+document.getElementById('flash-next').addEventListener('click', nextFlash);
+document.getElementById('side').addEventListener('change', ()=>{ renderFlash(); mcNext(); trNext(); spNext(); qfSetup(); });
+document.getElementById('cluster').addEventListener('change', ()=>{ flashBuildDeck(); matchNewRound(); mcNext(); trNext(); spNext(); qfSetup(); renderProgress(); });
+window.addEventListener('keydown', (e)=>{
+  if(document.querySelector('.panel.active')?.id!=='panel-flash') return;
+  if(e.key.toLowerCase()==='f') document.getElementById('flash-flip').click();
+  if(e.key.toLowerCase()==='k') document.getElementById('flash-know').click();
+  if(e.key.toLowerCase()==='r') document.getElementById('flash-next').click();
+});
+
+/* =====================
+   7) MATCHING
+===================== */
+let matchLeftSel=null, matchRightSel=null, matchPairs=[];
+function matchNewRound(){
+  const items=byCluster(DATA);
+  const round=sample(items, Math.min(6, items.length));
+  matchPairs=round.map(x=>({id:x.id,left:(sideSel()==='hu-en'?x.hu:x.en),right:(sideSel()==='hu-en'?x.en:x.hu)}));
+  const left=document.getElementById('match-left'); const right=document.getElementById('match-right'); left.innerHTML=''; right.innerHTML='';
+  shuffle(matchPairs);
+  const L=matchPairs.slice(); const R=shuffle(matchPairs.slice());
+  L.forEach(p=>{ const el=document.createElement('div'); el.className='item'; el.textContent=p.left; el.dataset.id=p.id; el.addEventListener('click',()=>matchSelect('L',el)); left.appendChild(el); });
+  R.forEach(p=>{ const el=document.createElement('div'); el.className='item'; el.textContent=p.right; el.dataset.id=p.id; el.addEventListener('click',()=>matchSelect('R',el)); right.appendChild(el); });
+  matchLeftSel=null; matchRightSel=null;
+}
+function matchSelect(side, el){
+  if(el.classList.contains('correct')) return;
+  if(side==='L'){ if(matchLeftSel){matchLeftSel.classList.remove('selected');} matchLeftSel=el; el.classList.add('selected'); }
+  else { if(matchRightSel){matchRightSel.classList.remove('selected');} matchRightSel=el; el.classList.add('selected'); }
+  if(matchLeftSel && matchRightSel){
+    if(matchLeftSel.dataset.id===matchRightSel.dataset.id){ matchLeftSel.classList.remove('selected'); matchRightSel.classList.remove('selected'); matchLeftSel.classList.add('correct'); matchRightSel.classList.add('correct'); STATS.match.correct++; saveStats(); document.getElementById('match-correct').textContent=STATS.match.correct; }
+    else{ matchLeftSel.classList.add('wrong'); matchRightSel.classList.add('wrong'); setTimeout(()=>{ matchLeftSel.classList.remove('selected','wrong'); matchRightSel.classList.remove('selected','wrong'); matchLeftSel=null; matchRightSel=null; },400); STATS.match.wrong++; saveStats(); document.getElementById('match-wrong').textContent=STATS.match.wrong; }
+  }
+}
+document.getElementById('match-reset').addEventListener('click', matchNewRound);
+document.getElementById('match-next').addEventListener('click', matchNewRound);
+
+/* =====================
+   8) MULTIPLE CHOICE
+===================== */
+let MC=null;
+function mcBuild(){ const pool=byCluster(DATA); const q=pick(pool); const side=sideSel(); const prompt=(side==='hu-en')? q.hu:q.en; const correct=(side==='hu-en')? q.en:q.hu; const distract=shuffle(pool.filter(x=>x.id!==q.id)).slice(0,3).map(x=>(side==='hu-en')?x.en:x.hu); const options=shuffle([correct,...distract]); return {q,prompt,correct,options}; }
+function mcRender(){ if(!MC){MC=mcBuild();} document.getElementById('mc-prompt').textContent=MC.prompt; const wrap=document.getElementById('mc-answers'); wrap.innerHTML=''; MC.options.forEach(opt=>{ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=opt; b.addEventListener('click',()=>{ STATS.mc.total++; if(norm(opt)===norm(MC.correct)){ b.classList.remove('ghost'); b.classList.add('ok'); STATS.mc.correct++; } else { b.classList.remove('ghost'); b.classList.add('bad'); } saveStats(); document.getElementById('mc-correct').textContent=STATS.mc.correct; document.getElementById('mc-total').textContent=STATS.mc.total; }); wrap.appendChild(b); }); document.getElementById('mc-correct').textContent=STATS.mc.correct; document.getElementById('mc-total').textContent=STATS.mc.total; }
+function mcNext(){ MC=mcBuild(); mcRender(); }
+document.getElementById('mc-next').addEventListener('click', mcNext);
+
+/* =====================
+   9) TRANSFORMATION
+===================== */
+let TR=null;
+function trBuild(){ const pool=byCluster(DATA); const e=pick(pool); const side=sideSel(); const prompt=(side==='hu-en')? e.hu:e.en; const answer=(side==='hu-en')? e.en:e.hu; return {e,prompt,answer}; }
+function trNext(){ TR=trBuild(); trRender(); }
+function trRender(){ document.getElementById('tr-prompt').textContent=TR.prompt; document.getElementById('tr-input').value=''; document.getElementById('tr-feedback').textContent=''; }
+document.getElementById('tr-check').addEventListener('click',()=>{ const v=document.getElementById('tr-input').value; const ok=norm(v)===norm(TR.answer); const fb=document.getElementById('tr-feedback'); if(ok){ fb.textContent="Helyes! "+TR.answer; fb.style.color='#86efac'; } else { fb.innerHTML="Még nem jó. Helyes: <b>"+TR.answer+"</b>"; fb.style.color='#fca5a5'; } });
+document.getElementById('tr-next').addEventListener('click', trNext);
+document.getElementById('tr-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('tr-check').click(); });
+
+/* =====================
+  10) PROMPTED SPEAKING – task + 60s timer + strike-through chips
+===================== */
+const SPEAK_TEMPLATES={
+  family:["Introduce your best friend and say why you get along.","Give advice to a friend about handling family rules.","Describe a time when there was no drama at home.","Explain what your main interest is and why."],
+  opinions:["Share your opinion about a popular reality show.","Agree or disagree with this: 'School uniforms are useful.' Explain.","Say what you think about social media for teens.","Politely disagree with a classmate's idea."],
+  daily:["Describe your weekday routine in two or three sentences.","Explain how you try to spend more time outdoors.","Tell a classmate how you manage your time on school days."],
+  school:["Give tips to a younger student about preparing for an exam.","Explain one school rule and say if you agree with it.","Talk about how you will learn a new skill this term."],
+  general:["Answer a simple 'Tell me about yourself' question.","Give advice to a friend who feels overwhelmed."]
+};
+let SP={exprs:[], used:[false,false,false], t:60, timer:null};
+function spRenderExprs(){
+  const wrap=document.getElementById('sp-exprs'); wrap.innerHTML='Use these 3 expressions: ';
+  SP.exprs.forEach((text, i)=>{
+    const chip=document.createElement('span'); chip.className='chip'; chip.textContent=text; chip.dataset.idx=i;
+    if(SP.used[i]) chip.classList.add('used');
+    chip.addEventListener('click', ()=> spToggleUsed(i, chip));
+    wrap.appendChild(chip);
+  });
+}
+function spToggleUsed(i, chipEl){
+  SP.used[i]=!SP.used[i];
+  chipEl.classList.toggle('used', SP.used[i]);
+}
+function spResetTimer(){
+  if(SP.timer){ clearInterval(SP.timer); SP.timer=null; }
+  SP.t=60; document.getElementById('sp-timer').textContent=SP.t;
+}
+function spStartTimer(){
+  spResetTimer();
+  SP.timer=setInterval(()=>{
+    SP.t--; document.getElementById('sp-timer').textContent=SP.t;
+    if(SP.t<=0){ clearInterval(SP.timer); SP.timer=null; }
+  },1000);
+}
+function spStopTimer(){ if(SP.timer){ clearInterval(SP.timer); SP.timer=null; } }
+function spNext(){
+  spStopTimer(); spResetTimer();
+  const c=clusterSel(); const pool=byCluster(DATA);
+  SP.exprs = sample(pool, Math.min(3, pool.length)).map(x=>x.en);
+  SP.used=[false,false,false];
+  const taskPool=SPEAK_TEMPLATES[c] || SPEAK_TEMPLATES.general;
+  document.getElementById('sp-prompt').textContent="Task: "+pick(taskPool);
+  spRenderExprs();
+}
+document.getElementById('sp-start').addEventListener('click', spStartTimer);
+document.getElementById('sp-stop').addEventListener('click', spStopTimer);
+document.getElementById('sp-next').addEventListener('click', spNext);
+document.getElementById('sp-done').addEventListener('click', ()=>{ STATS.flashSeen++; saveStats(); spStopTimer(); spNext(); });
+// Keyboard: 1-3 toggles chips when speaking panel active
+window.addEventListener('keydown', (e)=>{
+  if(document.querySelector('.panel.active')?.id!=='panel-speaking') return;
+  if(['1','2','3'].includes(e.key)){ const idx=Number(e.key)-1; const chips=[...document.querySelectorAll('#sp-exprs .chip')]; if(chips[idx]) chips[idx].click(); }
+});
+
+/* =====================
+   11) QUICK FIRE / BINGO
+===================== */
+let QF={running:false, t:60, timer:null, score:0, hits:0, prompt:null, tiles:[]};
+function qfBuildTiles(){
+  const pool=byCluster(DATA);
+  const twelve=sample(pool, Math.min(12, pool.length));
+  return twelve.map(x=>({
+    id:x.id,
+    prompt:(sideSel()==='hu-en')? x.hu : x.en,
+    shown:(sideSel()==='hu-en')? x.en : x.hu,
+    done:false
+  }));
+}
+function qfRenderGrid(){
+  const grid=document.getElementById('qf-grid'); grid.innerHTML='';
+  QF.tiles.forEach(t=>{
+    const el=document.createElement('div'); el.className='tile'; el.textContent=t.shown; el.dataset.id=t.id;
+    if(t.done) el.classList.add('hit');
+    el.addEventListener('click', ()=> qfClick(el));
+    grid.appendChild(el);
+  });
+}
+function qfSetup(){
+  QF.running=false; QF.t=60; QF.score=0; QF.hits=0; QF.prompt=null;
+  if(QF.timer){ clearInterval(QF.timer); QF.timer=null; }
+  QF.tiles=qfBuildTiles();
+  document.getElementById('qf-score').textContent='0';
+  document.getElementById('qf-hits').textContent='0';
+  document.getElementById('qf-timer').textContent='60';
+  document.getElementById('qf-prompt').textContent='Kezdéshez kattints a Start gombra.';
+  qfRenderGrid();
+}
+function qfRefillTilesDuringRun(){ QF.tiles=qfBuildTiles(); qfRenderGrid(); }
+function qfStart(){
+  if(QF.timer){ clearInterval(QF.timer); QF.timer=null; }
+  if(!QF.tiles || QF.tiles.length===0){ QF.tiles=qfBuildTiles(); qfRenderGrid(); }
+  QF.running=true; QF.t=60; QF.score=0; QF.hits=0;
+  document.getElementById('qf-score').textContent='0';
+  document.getElementById('qf-hits').textContent='0';
+  document.getElementById('qf-timer').textContent=QF.t;
+  qfNextPrompt();
+  QF.timer=setInterval(()=>{
+    QF.t--; document.getElementById('qf-timer').textContent=QF.t;
+    if(QF.t<=0){
+      clearInterval(QF.timer); QF.timer=null; QF.running=false;
+      document.getElementById('qf-prompt').textContent='Vége! Pont: '+QF.score+'  |  Találat: '+QF.hits+'/12';
+      if(QF.score>STATS.qf.best){ STATS.qf.best=QF.score; saveStats(); }
+      renderProgress();
     }
+  },1000);
+}
+function qfNextPrompt(){
+  const remaining=QF.tiles.filter(t=>!t.done);
+  if(remaining.length===0){ qfRefillTilesDuringRun(); }
+  const cand=QF.tiles.filter(t=>!t.done);
+  const target=cand.length? pick(cand) : pick(QF.tiles);
+  QF.prompt=target;
+  document.getElementById('qf-prompt').textContent=target.prompt;
+}
+function qfClick(el){
+  if(!QF.running) return;
+  const id=el.dataset.id;
+  if(QF.prompt && QF.prompt.id===id){
+    el.classList.add('hit'); el.classList.remove('miss');
+    const tile=QF.tiles.find(t=>t.id===id); if(tile) tile.done=true;
+    QF.score+=10; QF.hits++;
+    document.getElementById('qf-score').textContent=QF.score;
+    document.getElementById('qf-hits').textContent=QF.hits;
+    qfNextPrompt();
+  }else{
+    el.classList.add('miss'); setTimeout(()=>el.classList.remove('miss'),200);
+    QF.score=Math.max(0, QF.score-2);
+    document.getElementById('qf-score').textContent=QF.score;
+  }
+}
+document.getElementById('qf-start').addEventListener('click', qfStart);
 
-    function addPoints(n){ LS.points = LS.points + n; document.getElementById('points').textContent = LS.points; }
-    function refreshKnown(){ const known = LS.known; document.getElementById('knownCount').textContent = known.size; }
-    function clusterList(){ return [...CLUSTERS.keys()].sort(); }
-    function unlockedClusters(){ return [...LS.unlocked].filter(c=>CLUSTERS.has(c)); }
+/* =====================
+   12) PROGRESS
+===================== */
+function renderProgress(){
+  let knownTotal=0; CLUSTERS.forEach(c=> knownTotal+=getKnownSet(c).size );
+  document.getElementById('pg-known').textContent=knownTotal;
+  document.getElementById('pg-flash').textContent=STATS.flashSeen;
+  document.getElementById('pg-match').textContent=STATS.match.correct+' / '+STATS.match.wrong;
+  document.getElementById('pg-mc').textContent=STATS.mc.correct+' / '+STATS.mc.total;
+  document.getElementById('pg-qf').textContent=STATS.qf.best;
+  const box=document.getElementById('pg-clusters'); box.innerHTML='<div class="muted" style="margin-bottom:8px">Klaszterenkénti ismert kártyák</div>';
+  const grid=document.createElement('div'); grid.className='grid'; grid.style.gridTemplateColumns='repeat(auto-fit,minmax(160px,1fr))';
+  CLUSTERS.forEach(c=>{ const k=getKnownSet(c).size; const total=DATA.filter(x=>x.cluster===c).length; const el=document.createElement('div'); el.className='card'; el.innerHTML='<div><div class="muted small">'+c+'</div><div style="font-size:20px" class="mono">'+k+' / '+total+'</div></div>'; grid.appendChild(el); });
+  box.appendChild(grid);
+}
 
-    function clusterProgress(cluster){
-      const arr = CLUSTERS.get(cluster)||[]; const known = LS.known;
-      const k = arr.filter(e=>known.has(e.id)).length; const total = arr.length;
-      const pct = total? Math.round(100*k/total):0;
-      return {k, total, pct};
-    }
-
-    function maybeUnlockNext(){
-      const list = clusterList();
-      const set = LS.unlocked;
-      for(let i=0;i<list.length-1;i++){
-        const c = list[i]; const n = list[i+1];
-        if(set.has(c) && !set.has(n)){
-          const {pct} = clusterProgress(c);
-          if(pct>=70){ set.add(n); LS.unlockedSet = set; toast(`New cluster unlocked: ${n}`); }
-        }
-      }
-      renderProgress(); renderClusterStatus(); fillClusterFilter();
-    }
-
-    function renderClusterStatus(){
-      const uc = unlockedClusters();
-      document.getElementById('clusterStatus').textContent =
-        uc.length? `Unlocked clusters: ${uc.join(', ')}` : 'No clusters unlocked yet';
-    }
-
-    /*************** FLASHCARDS ***************/
-    let flashDeck = []; let flashIdx = 0; let flashFlipped=false;
-
-    function fillClusterFilter(){
-      const sel = document.getElementById('clusterFilter'); sel.innerHTML='';
-      const optAll = document.createElement('option'); optAll.value='all'; optAll.textContent='All'; sel.appendChild(optAll);
-      clusterList().forEach(c=>{
-        const o = document.createElement('option'); o.value=c; o.textContent = LS.unlocked.has(c)? c : `${c} (locked)`; sel.appendChild(o);
-      });
-    }
-
-    function buildFlashDeck(){
-      const side = document.getElementById('flashSide').value;
-      const cluster = document.getElementById('clusterFilter').value;
-      const known = LS.known;
-      let arr = EXPRESSIONS.filter(e=> cluster==='all' ? true : e.cluster===cluster);
-      flashDeck = arr.filter(e=>!known.has(e.id));
-      shuffle(flashDeck); flashIdx = 0; flashFlipped=false; renderFlash();
-      const list = document.getElementById('knownList'); list.innerHTML='';
-      arr.filter(e=>known.has(e.id)).forEach(e=>{
-        const li=document.createElement('li'); li.textContent = (side==='hu'? e.hu : e.en); list.appendChild(li);
-      });
-      document.getElementById('flashCount').textContent = flashDeck.length;
-    }
-
-    function renderFlash(){
-      const front = document.getElementById('flashFront');
-      const back = document.getElementById('flashBack');
-      if(!flashDeck.length){
-        front.textContent = '🎉 Minden kártyát „I know”-ra jelöltél ebben a klaszterben!';
-        back.classList.add('hidden'); back.textContent=''; return;
-      }
-      const side = document.getElementById('flashSide').value;
-      const e = flashDeck[flashIdx];
-      front.textContent = side==='hu'? e.hu : e.en;
-      back.textContent  = side==='hu'? e.en : e.hu;
-      back.classList.toggle('hidden', !flashFlipped);
-    }
-
-    function flipFlash(){ flashFlipped = !flashFlipped; renderFlash(); }
-    function nextFlash(){ if(!flashDeck.length) return; flashIdx=(flashIdx+1)%flashDeck.length; flashFlipped=false; renderFlash(); }
-    function markIKnow(){
-      if(!flashDeck.length) return; const e = flashDeck[flashIdx];
-      const known = LS.known; known.add(e.id); LS.knownSet = known; addPoints(5); refreshKnown();
-      flashDeck.splice(flashIdx,1); if(flashIdx>=flashDeck.length) flashIdx=0; renderFlash(); maybeUnlockNext();
-    }
-
-    function resetKnownCluster(){
-      const cluster = document.getElementById('clusterFilter').value;
-      if(cluster==='all') { alert('Válassz klasztert a resethez.'); return; }
-      const ids = new Set((CLUSTERS.get(cluster)||[]).map(e=>e.id));
-      const known = LS.known; ids.forEach(id=> known.delete(id)); LS.knownSet = known; refreshKnown(); buildFlashDeck(); renderProgress();
-    }
-
-    /*************** MATCHING ***************/
-    let matchPairs = []; let matchSel = null; let matchedCount=0;
-
-    function newMatch(){
-      const pool = unlockedPools();
-      matchPairs = sample(pool, 5);
-      matchedCount=0; matchSel=null;
-      const left = matchPairs.map(e=>({id:e.id, text:e.hu, side:'hu'}));
-      const right = matchPairs.map(e=>({id:e.id, text:e.en, side:'en'}));
-      shuffle(left); shuffle(right);
-      const grid = document.getElementById('matchGrid'); grid.innerHTML='';
-      const colL = document.createElement('div'); colL.className = 'space-y-2';
-      left.forEach(item=> colL.appendChild(matchItem(item)));
-      const colR = document.createElement('div'); colR.className = 'space-y-2';
-      right.forEach(item=> colR.appendChild(matchItem(item)));
-      grid.appendChild(colL); grid.appendChild(colR);
-      document.getElementById('matchMsg').textContent='';
-    }
-
-    function matchItem(item){
-      const div = document.createElement('div');
-      div.className='border rounded-xl p-3 bg-white cursor-pointer';
-      div.textContent=item.text; div.dataset.id=item.id; div.dataset.side=item.side;
-      div.addEventListener('click', ()=> selectMatch(div));
-      return div;
-    }
-
-    function selectMatch(el){
-      if(el.classList.contains('opacity-40')) return;
-      if(!matchSel){ matchSel = el; el.style.outline='2px solid #818cf8'; el.style.outlineOffset='2px'; return; }
-      if(matchSel===el){ matchSel.style.outline='none'; matchSel=null; return; }
-      if(matchSel.dataset.id===el.dataset.id && matchSel.dataset.side!==el.dataset.side){
-        matchSel.classList.add('opacity-40'); el.classList.add('opacity-40');
-        matchSel.style.outline='none'; matchSel=null; matchedCount++; addPoints(3);
-        if(matchedCount===matchPairs.length){ document.getElementById('matchMsg').textContent='✔ Kész!'; addPoints(5); }
-      } else {
-        shake(el); shake(matchSel); matchSel.style.outline='none'; matchSel=null;
-      }
-    }
-
-    /*************** MCQ ***************/
-    function newMcq(){
-      const pool = unlockedPools();
-      const q = randomChoice(pool);
-      const opts = uniqueSample(pool, 4, q);
-      const box = document.getElementById('mcqBox');
-      box.innerHTML = '';
-      const qEl = document.createElement('div'); qEl.className='text-xl font-semibold'; qEl.textContent = q.hu; box.appendChild(qEl);
-      const group = document.createElement('div'); group.className='mt-3 grid sm:grid-cols-2 gap-2';
-      opts.forEach(o=>{
-        const b=document.createElement('button'); b.className='btn-sec text-left'; b.textContent=o.en; b.addEventListener('click', ()=>{
-          if(o.id===q.id){ b.classList.add('bg-green-100'); addPoints(2); toast('Correct'); }
-          else { b.classList.add('bg-red-100'); shake(b); }
-        }); group.appendChild(b);
-      });
-      box.appendChild(group);
-    }
-
-    /*************** TRANSFORMATION ***************/
-    function newTransform(){
-      const t = randomChoice(TRANSFORMS);
-      const box = document.getElementById('transformBox');
-      box.innerHTML='';
-      const src = document.createElement('div'); src.className='text-lg font-semibold'; src.textContent = 'Rewrite: ' + t.src; box.appendChild(src);
-      const must = document.createElement('div'); must.className='text-sm text-slate-500'; must.textContent = `Use: “${t.must}”`; box.appendChild(must);
-      const inp = document.createElement('textarea'); inp.className='w-full border rounded-xl p-3 mt-2'; inp.rows=3; box.appendChild(inp);
-      const row = document.createElement('div'); row.className='mt-2 flex gap-2';
-      const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Check';
-      const hint = document.createElement('button'); hint.className='btn-sec'; hint.textContent='Show example';
-      const msg = document.createElement('div'); msg.className='text-sm mt-2';
-      row.appendChild(btn); row.appendChild(hint); box.appendChild(row); box.appendChild(msg);
-      btn.addEventListener('click', ()=>{
-        const ok = inp.value.toLowerCase().includes(t.must.toLowerCase());
-        if(ok){ msg.textContent='✔ Looks good!'; addPoints(4); } else { msg.textContent='Try to include the target phrase.'; shake(inp); }
-      });
-      hint.addEventListener('click', ()=>{ alert('Example: '+t.targetExample); });
-    }
-
-    /*************** PROMPTED SPEAKING ***************/
-    let promptTimer=null; let remaining=60;
-    function newPrompt(){
-      const topic = randomChoice(SPEAKING_TOPICS);
-      const picked = uniqueSample(unlockedPools(), 3);
-      document.getElementById('promptTopic').textContent = topic;
-      const cont = document.getElementById('promptExpr'); cont.innerHTML='';
-      picked.forEach(p=>{
-        const chip = document.createElement('button'); chip.className='btn-sec'; chip.textContent=p.en; chip.addEventListener('click', ()=> chip.classList.toggle('bg-green-100'));
-        cont.appendChild(chip);
-      });
-      resetTimer();
-    }
-    function resetTimer(){ clearInterval(promptTimer); remaining=60; renderTimer(); }
-    function startPrompt(){ resetTimer(); promptTimer = setInterval(()=>{ remaining--; renderTimer(); if(remaining<=0){ clearInterval(promptTimer); addPoints(5); toast('Time!'); } }, 1000); }
-    function renderTimer(){ document.getElementById('promptTimer').textContent = `00:${String(Math.max(0,remaining)).padStart(2,'0')}`; }
-
-    /*************** BINGO ***************/
-    function newBingo(){
-      const grid = document.getElementById('bingoGrid'); grid.innerHTML='';
-      const items = uniqueSample(unlockedPools(), 9);
-      items.forEach(it=>{
-        const c=document.createElement('div'); c.className='bingo-cell'; c.textContent=it.en; c.addEventListener('click',()=>{ c.classList.toggle('used'); checkBingoWin(); }); grid.appendChild(c);
-      });
-    }
-    function checkBingoWin(){
-      const cells=[...document.querySelectorAll('#bingoGrid .bingo-cell')];
-      const used=cells.filter(c=>c.classList.contains('used')).length;
-      if(used===9){ toast('Bingo! Great job using all 9.'); addPoints(10); }
-    }
-
-    /*************** PROGRESS ***************/
-    function renderProgress(){
-      const box=document.getElementById('progressList'); box.innerHTML='';
-      clusterList().forEach(c=>{
-        const {k,total,pct} = clusterProgress(c);
-        const wrap=document.createElement('div'); wrap.className='border rounded-xl p-3 bg-white flex items-center justify-between';
-        const left=document.createElement('div'); left.innerHTML=`<div class="font-medium">${c}</div><div class="text-xs text-slate-500">${LS.unlocked.has(c)?'unlocked':'locked'}</div>`;
-        const right=document.createElement('div'); right.innerHTML=`<div class="text-sm">${k}/${total} (${pct}%)</div>`;
-        const bar=document.createElement('div'); bar.className='progress-bar mt-2';
-        const fill=document.createElement('div'); fill.className='progress-fill'; fill.style.width=pct+'%'; bar.appendChild(fill);
-        const col=document.createElement('div'); col.appendChild(left); col.appendChild(bar);
-        wrap.innerHTML=''; wrap.appendChild(col); wrap.appendChild(right); box.appendChild(wrap);
-      });
-    }
-
-    /*************** DAILY ***************/
-    function buildDaily(){
-      const seed = Number(todayStr().replaceAll('-',''));
-      const rng = mulberry32(seed);
-      const pool = unlockedPools();
-      const pick = pool[Math.floor(rng()*pool.length)] || EXPRESSIONS[0];
-      document.getElementById('dailyText').textContent = `Use: “${pick.en}”`;
-      document.getElementById('btnDailyDone').onclick = ()=>{ if(!LS.dailyDone){ addPoints(5); LS.setDailyDone(); toast('Daily done!'); } };
-    }
-
-    /*************** HELPERS ***************/
-    function unlockedPools(){ const set = LS.unlocked; return EXPRESSIONS.filter(e=>set.has(e.cluster)); }
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j]], a[j]; } return a; }
-    function sample(arr, n){ const c=[...arr]; shuffle(c); return c.slice(0, Math.min(n, c.length)); }
-    function uniqueSample(arr, n, ensure){ const c=[...arr]; if(ensure){ c.splice(c.indexOf(ensure),1); } shuffle(c); const out = ensure? [ensure]:[]; while(out.length<n && c.length){ out.push(c.shift()); } return shuffle(out); }
-    function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-    function mulberry32(a){
-      let t = a >>> 0;
-      return function(){
-        t += 0x6D2B79F5;
-        let r = Math.imul(t ^ (t >>> 15), 1 | t);
-        r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
-        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-
-    function toast(msg){
-      const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
-      document.body.appendChild(el); setTimeout(()=> el.remove(), 1600);
-    }
-    function shake(el){ if(!el) return; el.animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:200}); }
-
-    function keyShortcuts(){
-      document.addEventListener('keydown', (e)=>{
-        if(e.key==='f' || e.key==='F') flipFlash();
-        if(e.key==='k' || e.key==='K') markIKnow();
-        if(e.key==='r' || e.key==='R') nextFlash();
-      });
-    }
-
-    /*************** TABS ***************/
-    function switchTo(mode){
-      document.querySelectorAll('.mode-tab').forEach(t=> t.classList.toggle('active', t.dataset.mode===mode));
-      document.querySelectorAll('[id^="view-"]').forEach(v=> v.classList.add('hidden'));
-      document.getElementById('view-'+mode).classList.remove('hidden');
-      if(mode==='flash'){ buildFlashDeck(); }
-      if(mode==='match'){ newMatch(); }
-      if(mode==='mcq'){ newMcq(); }
-      if(mode==='transform'){ newTransform(); }
-      if(mode==='prompt'){ newPrompt(); }
-      if(mode==='bingo'){ newBingo(); }
-      if(mode==='progress'){ renderProgress(); }
-    }
-
-    /*************** INIT ***************/
-    function init(){
-      document.getElementById('points').textContent = LS.points;
-      refreshKnown(); updateStreak(); fillClusterFilter(); renderClusterStatus(); buildDaily();
-
-      document.getElementById('flashCard').addEventListener('click', flipFlash);
-      document.getElementById('btnFlip').addEventListener('click', flipFlash);
-      document.getElementById('btnIKnow').addEventListener('click', markIKnow);
-      document.getElementById('btnKeep').addEventListener('click', nextFlash);
-      document.getElementById('btnNext').addEventListener('click', nextFlash);
-      document.getElementById('flashSide').addEventListener('change', buildFlashDeck);
-      document.getElementById('clusterFilter').addEventListener('change', buildFlashDeck);
-      document.getElementById('btnResetKnown').addEventListener('click', resetKnownCluster);
-
-      document.getElementById('btnNewMatch').addEventListener('click', newMatch);
-      document.getElementById('btnNewMcq').addEventListener('click', newMcq);
-      document.getElementById('btnNewTransform').addEventListener('click', newTransform);
-
-      document.getElementById('btnStartPrompt').addEventListener('click', startPrompt);
-      document.getElementById('btnNewPrompt').addEventListener('click', newPrompt);
-
-      document.getElementById('btnNewBingo').addEventListener('click', newBingo);
-
-      document.querySelectorAll('.mode-tab').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.mode)));
-      keyShortcuts();
-
-      switchTo('flash');
-    }
-    window.addEventListener('load', init);
-  </script>
+/* =====================
+   13) INIT
+===================== */
+function init(){ flashBuildDeck(); matchNewRound(); mcNext(); trNext(); spNext(); qfSetup(); renderProgress(); }
+init();
+</script>
 </body>
 </html>
