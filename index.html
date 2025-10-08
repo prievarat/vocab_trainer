@@ -313,6 +313,84 @@ function normalizeData(raw){
   }).filter(x=>x.hu && x.en);
 }
 
+// Injected real DB
+window.DATA = [
+  { en:'I\'m not sure what/where/why exactly.', hu:'nem tudom, pontosan mit/hol/miért …', cluster:'family' },
+  { en:'His main interest is …', hu:'fő érdeklődési köre …', cluster:'family' },
+  { en:'A lot of people get divorced and live on their own, and bring up their children on their own.', hu:'Sokan elválnak, egyedül élnek, és a gyerekeiket is egyedül nevelik.', cluster:'family' },
+  { en:'… which means …', hu:'ami azt jelenti, hogy …', cluster:'family' },
+  { en:'He … for a living.', hu:'vmit csinál a megélhetésért / él vmiből', cluster:'family' },
+  { en:'But I only have very vague memories of her.', hu:'De csak nagyon halvány emlékeim vannak róla.', cluster:'family' },
+  { en:'I come from quite a big family.', hu:'Elég nagy családból származom.', cluster:'family' },
+  { en:'However.', hu:'de / azonban', cluster:'family' },
+  { en:'I suppose.', hu:'azt hiszem / gondolom', cluster:'family' },
+  { en:'As I remember …', hu:'amennyire emlékszem / ha jól emlékszem', cluster:'family' },
+  { en:'It was a lot better than …', hu:'sokkal jobb volt, mint …', cluster:'family' },
+  { en:'Normally.', hu:'általában', cluster:'family' },
+  { en:'By the way …', hu:'mellesleg', cluster:'family' },
+  { en:'I have a lot of presents to buy at Christmas.', hu:'Sok ajándékot kell vennem karácsonykor.', cluster:'family' },
+  { en:'They were around my age.', hu:'kb. velem egykorúak voltak.', cluster:'family' },
+  { en:'They lived in the country for a while.', hu:'Vidéken éltek egy ideig.', cluster:'family' },
+  { en:'Nowadays …', hu:'manapság', cluster:'family' },
+  { en:"I don't have a very close contact with …", hu:'nincs szoros kapcsolatom …-val/vel', cluster:'family' },
+  { en:'He/She is the breadwinner in the family.', hu:'Ő a kenyérkereső a családban.', cluster:'family' },
+  { en:'It sounds really nice.', hu:'Ez igazán jól hangzik.', cluster:'family' },
+  { en:'I started to get my independence and lived my own life a bit.', hu:'Kezdtem önálló lenni, és a saját életemet élni.', cluster:'family' },
+  { en:'Occasionally.', hu:'néha', cluster:'family' },
+  { en:'The family atmosphere is/was mostly very happy.', hu:'Nagyjából mindig jó volt a hangulat a családban.', cluster:'family' },
+  { en:'During my early childhood …', hu:'kora gyermekkoromban', cluster:'family' },
+  { en:'Things were never really the same after that.', hu:'Azután semmi sem volt már ugyanolyan.', cluster:'family' },
+  { en:'I must admit …', hu:'be kell vallanom / ismernem', cluster:'family' },
+  { en:'In my growing years …', hu:'fiatalkoromban', cluster:'family' },
+  { en:"We didn't get on so well a lot of times.", hu:'Sokszor nem jöttünk ki valami jól.', cluster:'family' },
+  { en:'Every other week.', hu:'minden második héten', cluster:'family' },
+  { en:'She seems to spend half of her life … (in the kitchen / cooking).', hu:'Fél életét (főzéssel) tölti.', cluster:'family' },
+  { en:'… which was a bit disappointing for me.', hu:'ami elég kiábrándító volt', cluster:'family' },
+  { en:'Actually …', hu:'öööö / hát / igazából', cluster:'family' },
+  { en:'We have a lot of things in common / we have nothing in common.', hu:'Sok/semmi közös nincs bennünk.', cluster:'family' },
+  { en:'He was not in the least interested in …', hu:'legkevésbé sem érdekelte …', cluster:'family' },
+  { en:'As far as I know …', hu:'már amennyire én tudom …', cluster:'family' },
+  { en:'He lived a very routine life.', hu:'Nagyon egyhangú életet élt.', cluster:'family' },
+  { en:'I organised for him to go to Spain.', hu:'Elintéztem neki, hogy Spanyolországba utazzon.', cluster:'family' },
+  { en:'… which was really fascinating.', hu:'ami lenyűgöző volt', cluster:'family' },
+  { en:'I suppose he is not just a sociable type.', hu:'Nem túl barátkozós típus.', cluster:'family' },
+  { en:'I would say that …', hu:'azt mondanám, hogy …', cluster:'family' },
+  { en:'He gets completely lost in his books.', hu:'Teljesen belemerül a könyveibe.', cluster:'family' },
+  { en:'They really take care of each other.', hu:'Nagyon gondoskodnak egymásról.', cluster:'family' },
+  { en:'One of my dreams is to be happily married to a ripe old age.', hu:'Álmom a boldog, hosszú házasság.', cluster:'family' },
+  { en:'So they say.', hu:'Legalábbis ezt mondják.', cluster:'family' },
+  { en:"My daily routine is a bit different now that I'm working/studying…", hu:'Egy kicsit más a napjaim beosztása most, hogy tanulok/dolgozom…', cluster:'daily' },
+  { en:'I get a cake or something on the way.', hu:'Veszek egy sütit, vagy valami mást útközben.', cluster:'daily' },
+  { en:'All the time.', hu:'Állandóan.', cluster:'daily' },
+  { en:'There are certain tasks I have to do…', hu:'Vannak bizonyos feladatok, amiket el kell végeznem…', cluster:'daily' },
+  { en:'It is quite nice because it means…', hu:'Ez elég jó, mert ez azt jelenti, hogy…', cluster:'daily' },
+  { en:'I have some homework to do.', hu:'Van házim, amit meg kell csinálnom.', cluster:'daily' },
+  { en:'Afterwards.', hu:'Azután.', cluster:'daily' },
+  { en:'I have an excuse to do something.', hu:'Van mentségem arra, hogy…', cluster:'daily' },
+  { en:'I tend to (do something).', hu:'Hajlamos vagyok arra, hogy…', cluster:'daily' },
+  { en:'I find it quite difficult (to do something).', hu:'Elég nehéznek találom, hogy…', cluster:'daily' },
+  { en:"It's (not) something I particularly enjoy.", hu:'Ez egy olyan valami, amit (nem) különösen élvezek.', cluster:'daily' },
+  { en:'I stay quite late at work/school.', hu:'Sokáig dolgozom / sokáig vagyok iskolában.', cluster:'daily' },
+  { en:'I do some shopping on the way back home.', hu:'Bevásárolok hazafelé.', cluster:'daily' },
+  { en:"I don't read as many books as I should / used to.", hu:'Nem olvasok annyit, amennyit kellene / amennyit régen szoktam.', cluster:'daily' },
+  { en:'I like to find time in the day for things that are really important to me.', hu:'Szeretek időt találni a nap során azokra a dolgokra, amelyek igazán fontosak a számomra.', cluster:'daily' },
+  { en:'Learning to play the piano, etc. is very demanding.', hu:'Zongorázni megtanulni stb. nagyon megterhelő.', cluster:'daily' },
+  { en:'Some things have to be done at a certain time.', hu:'Bizonyos dolgokat időre meg kell csinálni.', cluster:'daily' },
+  { en:'I give these things priority (over other things).', hu:'Ezek a dolgok prioritást élveznek (más dolgokkal szemben).', cluster:'daily' },
+  { en:"I don't have special times for these things.", hu:'Nincs külön idő félretéve ezeknek a dolgoknak.', cluster:'daily' },
+  { en:'I have to get up very early to go to lessons.', hu:'Nagyon korán kell kelnem, mert óráim vannak / iskolába járok.', cluster:'daily' },
+  { en:'I have a lot of family commitments.', hu:'Sok családi kötelezettségem van.', cluster:'daily' },
+  { en:'One thing is regular in my life, and that is…', hu:'Egy dolog rendszeres az életemben, ez pedig…', cluster:'daily' },
+  { en:'For some reason…', hu:'Valamilyen okból kifolyólag…', cluster:'daily' },
+  { en:'I find this both challenging and satisfying.', hu:'Ez nagy kihívást és nagy elégedettséget jelent számomra.', cluster:'daily' },
+  { en:"I feel I've achieved something.", hu:'Úgy érzem, hogy elértem valamit.', cluster:'daily' },
+  { en:'I spend a lot of time learning…', hu:'Sok időt töltök tanulással…', cluster:'daily' },
+  { en:'I sometimes have free periods with no lessons.', hu:'Néha lyukasóráim vannak.', cluster:'daily' },
+  { en:'From this time onwards…', hu:'Innentől kezdve…', cluster:'daily' },
+  { en:'I suppose a bit of balance in everything is really important.', hu:'Úgy gondolom, hogy az egyensúly mindenben rendkívül fontos.', cluster:'daily' },
+  { en:'Sometimes I oversleep and miss the bus in the morning.', hu:'Néha elalszom, és lekésem a buszt reggel.', cluster:'daily' }
+]
+// End injected DB
 const RAW=(window.EXPRESSIONS || window.INV || window.CARDS || window.DATA || DATA_FALLBACK);
 const DATA=normalizeData(RAW);
 const CLUSTERS=Array.from(new Set(DATA.map(d=>d.cluster))).sort();
@@ -423,20 +501,55 @@ function matchNewRound(){
 }
 function matchSelect(side, el){
   if(el.classList.contains('correct')) return;
-  if(side==='L'){ if(matchLeftSel){matchLeftSel.classList.remove('selected');} matchLeftSel=el; el.classList.add('selected'); }
-  else { if(matchRightSel){matchRightSel.classList.remove('selected');} matchRightSel=el; el.classList.add('selected'); }
-  if(matchLeftSel && matchRightSel){
-    if(matchLeftSel.dataset.id===matchRightSel.dataset.id){ matchLeftSel.classList.remove('selected'); matchRightSel.classList.remove('selected'); matchLeftSel.classList.add('correct'); matchRightSel.classList.add('correct'); STATS.match.correct++; saveStats(); const c=document.getElementById('match-correct'); if(c) c.textContent=STATS.match.correct; }
-    else{ matchLeftSel.classList.add('wrong'); matchRightSel.classList.add('wrong'); setTimeout(()=>{ matchLeftSel.classList.remove('selected','wrong'); matchRightSel.classList.remove('selected','wrong'); matchLeftSel=null; matchRightSel=null; },400); STATS.match.wrong++; saveStats(); const w=document.getElementById('match-wrong'); if(w) w.textContent=STATS.match.wrong; }
+
+  if(side==='L'){
+    if(typeof matchLeftSel !== 'undefined' && matchLeftSel){ matchLeftSel.classList.remove('selected'); }
+    matchLeftSel = el;
+    el.classList.add('selected');
+  } else {
+    if(typeof matchRightSel !== 'undefined' && matchRightSel){ matchRightSel.classList.remove('selected'); }
+    matchRightSel = el;
+    el.classList.add('selected');
+  }
+
+  if(typeof matchLeftSel !== 'undefined' && typeof matchRightSel !== 'undefined' && matchLeftSel && matchRightSel){
+    if(matchLeftSel.dataset.id === matchRightSel.dataset.id){
+      // correct pair
+      matchLeftSel.classList.remove('selected');
+      matchRightSel.classList.remove('selected');
+      matchLeftSel.classList.add('correct');
+      matchRightSel.classList.add('correct');
+
+      if(typeof STATS !== 'undefined' && STATS.match){
+        STATS.match.correct++; 
+        if(typeof saveStats === 'function'){ saveStats(); }
+        const c=document.getElementById('match-correct'); if(c) c.textContent=STATS.match.correct;
+      }
+
+      // FIX: clear selections so next pair starts clean
+      matchLeftSel = null;
+      matchRightSel = null;
+
+    } else {
+      // wrong pair
+      matchLeftSel.classList.add('wrong');
+      matchRightSel.classList.add('wrong');
+      setTimeout(()=>{
+        matchLeftSel.classList.remove('selected','wrong');
+        matchRightSel.classList.remove('selected','wrong');
+        matchLeftSel = null;
+        matchRightSel = null;
+      }, 400);
+
+      if(typeof STATS !== 'undefined' && STATS.match){
+        STATS.match.wrong++; 
+        if(typeof saveStats === 'function'){ saveStats(); }
+        const w=document.getElementById('match-wrong'); if(w) w.textContent=STATS.match.wrong;
+      }
+    }
   }
 }
-const mr=document.getElementById('match-reset'); if(mr) mr.addEventListener('click', matchNewRound);
-const mn=document.getElementById('match-next');  if(mn) mn.addEventListener('click', matchNewRound);
 
-/* =====================
-   8) MULTIPLE CHOICE
-===================== */
-let MC=null;
 function mcBuild(){ const pool=byCluster(DATA); const q=pick(pool); const side=sideSel(); const prompt=(side==='hu-en')? q.hu:q.en; const correct=(side==='hu-en')? q.en:q.hu; const distract=shuffle(pool.filter(x=>x.id!==q.id)).slice(0,3).map(x=>(side==='hu-en')?x.en:x.hu); const options=shuffle([correct,...distract]); return {q,prompt,correct,options}; }
 function mcRender(){ if(!MC){MC=mcBuild();} const promptEl=document.getElementById('mc-prompt'); if(promptEl) promptEl.textContent=MC.prompt; const wrap=document.getElementById('mc-answers'); if(!wrap) return; wrap.innerHTML=''; MC.options.forEach(opt=>{ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=opt; b.addEventListener('click',()=>{ STATS.mc.total++; if(norm(opt)===norm(MC.correct)){ b.classList.remove('ghost'); b.classList.add('ok'); STATS.mc.correct++; } else { b.classList.remove('ghost'); b.classList.add('bad'); } saveStats(); const c=document.getElementById('mc-correct'); if(c) c.textContent=STATS.mc.correct; const t=document.getElementById('mc-total'); if(t) t.textContent=STATS.mc.total; }); wrap.appendChild(b); }); const c=document.getElementById('mc-correct'); if(c) c.textContent=STATS.mc.correct; const t=document.getElementById('mc-total'); if(t) t.textContent=STATS.mc.total; }
 function mcNext(){ MC=mcBuild(); mcRender(); }
