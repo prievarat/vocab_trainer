@@ -210,6 +210,7 @@
     <div class="between">
       <div class="row">
         <button id="qf-start" class="btn primary">Start (60s)</button>
+        <button id="qf-reset" class="btn">Újra</button>
         <span class="pill">Pont: <span id="qf-score">0</span></span>
         <span class="pill">Találat: <span id="qf-hits">0</span>/12</span>
       </div>
@@ -313,7 +314,8 @@ function normalizeData(raw){
   }).filter(x=>x.hu && x.en);
 }
 
-// Injected real DB
+
+// === Injected real DB ===
 window.DATA = [
   { en:'I\'m not sure what/where/why exactly.', hu:'nem tudom, pontosan mit/hol/miért …', cluster:'family' },
   { en:'His main interest is …', hu:'fő érdeklődési köre …', cluster:'family' },
@@ -389,8 +391,28 @@ window.DATA = [
   { en:'From this time onwards…', hu:'Innentől kezdve…', cluster:'daily' },
   { en:'I suppose a bit of balance in everything is really important.', hu:'Úgy gondolom, hogy az egyensúly mindenben rendkívül fontos.', cluster:'daily' },
   { en:'Sometimes I oversleep and miss the bus in the morning.', hu:'Néha elalszom, és lekésem a buszt reggel.', cluster:'daily' }
-]
-// End injected DB
+];
+// Merge extra data from localStorage BEFORE RAW
+(function(){
+  try{
+    const extraStr = localStorage.getItem('EXTRA_DATA_JSON');
+    if(extraStr){
+      const extra = JSON.parse(extraStr);
+      if(Array.isArray(extra)){
+        const baseIds = new Set(window.DATA.map(x=>x.id));
+        for(const it of extra){
+          if(it && typeof it==='object' && it.id && it.en && it.hu && it.cluster){
+            if(!baseIds.has(it.id)){
+              window.DATA.push({ id:String(it.id), en:String(it.en), hu:String(it.hu), cluster:String(it.cluster) });
+              baseIds.add(it.id);
+            }
+          }
+        }
+      }
+    }
+  }catch(e){ console.warn('EXTRA_DATA merge error:', e); }
+})();
+// === /Injected real DB ===
 const RAW=(window.EXPRESSIONS || window.INV || window.CARDS || window.DATA || DATA_FALLBACK);
 const DATA=normalizeData(RAW);
 const CLUSTERS=Array.from(new Set(DATA.map(d=>d.cluster))).sort();
@@ -503,16 +525,16 @@ function matchSelect(side, el){
   if(el.classList.contains('correct')) return;
 
   if(side==='L'){
-    if(typeof matchLeftSel !== 'undefined' && matchLeftSel){ matchLeftSel.classList.remove('selected'); }
+    if(matchLeftSel){ matchLeftSel.classList.remove('selected'); }
     matchLeftSel = el;
     el.classList.add('selected');
   } else {
-    if(typeof matchRightSel !== 'undefined' && matchRightSel){ matchRightSel.classList.remove('selected'); }
+    if(matchRightSel){ matchRightSel.classList.remove('selected'); }
     matchRightSel = el;
     el.classList.add('selected');
   }
 
-  if(typeof matchLeftSel !== 'undefined' && typeof matchRightSel !== 'undefined' && matchLeftSel && matchRightSel){
+  if(matchLeftSel && matchRightSel){
     if(matchLeftSel.dataset.id === matchRightSel.dataset.id){
       // correct pair
       matchLeftSel.classList.remove('selected');
@@ -521,7 +543,7 @@ function matchSelect(side, el){
       matchRightSel.classList.add('correct');
 
       if(typeof STATS !== 'undefined' && STATS.match){
-        STATS.match.correct++; 
+        STATS.match.correct++;
         if(typeof saveStats === 'function'){ saveStats(); }
         const c=document.getElementById('match-correct'); if(c) c.textContent=STATS.match.correct;
       }
@@ -542,14 +564,32 @@ function matchSelect(side, el){
       }, 400);
 
       if(typeof STATS !== 'undefined' && STATS.match){
-        STATS.match.wrong++; 
+        STATS.match.wrong++;
         if(typeof saveStats === 'function'){ saveStats(); }
         const w=document.getElementById('match-wrong'); if(w) w.textContent=STATS.match.wrong;
       }
     }
   }
 }
+const mr=document.getElementById('match-reset'); if(mr) mr.addEventListener('click', matchReset);
+const mn=document.getElementById('match-next');  if(mn) mn.addEventListener('click', matchNewRound);
 
+
+function matchReset(){
+  // Reset per-session stats and start fresh round
+  if(typeof STATS!=='undefined' && STATS.match){
+    STATS.match.correct=0;
+    STATS.match.wrong=0;
+    const c1=document.getElementById('match-correct'); if(c1) c1.textContent='0';
+    const c2=document.getElementById('match-wrong');   if(c2) c2.textContent='0';
+    if(typeof saveStats==='function') saveStats();
+  }
+  matchNewRound();
+}
+/* =====================
+   8) MULTIPLE CHOICE
+===================== */
+let MC=null;
 function mcBuild(){ const pool=byCluster(DATA); const q=pick(pool); const side=sideSel(); const prompt=(side==='hu-en')? q.hu:q.en; const correct=(side==='hu-en')? q.en:q.hu; const distract=shuffle(pool.filter(x=>x.id!==q.id)).slice(0,3).map(x=>(side==='hu-en')?x.en:x.hu); const options=shuffle([correct,...distract]); return {q,prompt,correct,options}; }
 function mcRender(){ if(!MC){MC=mcBuild();} const promptEl=document.getElementById('mc-prompt'); if(promptEl) promptEl.textContent=MC.prompt; const wrap=document.getElementById('mc-answers'); if(!wrap) return; wrap.innerHTML=''; MC.options.forEach(opt=>{ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=opt; b.addEventListener('click',()=>{ STATS.mc.total++; if(norm(opt)===norm(MC.correct)){ b.classList.remove('ghost'); b.classList.add('ok'); STATS.mc.correct++; } else { b.classList.remove('ghost'); b.classList.add('bad'); } saveStats(); const c=document.getElementById('mc-correct'); if(c) c.textContent=STATS.mc.correct; const t=document.getElementById('mc-total'); if(t) t.textContent=STATS.mc.total; }); wrap.appendChild(b); }); const c=document.getElementById('mc-correct'); if(c) c.textContent=STATS.mc.correct; const t=document.getElementById('mc-total'); if(t) t.textContent=STATS.mc.total; }
 function mcNext(){ MC=mcBuild(); mcRender(); }
@@ -578,6 +618,8 @@ function qfSetup(){
   const pr=document.getElementById('qf-prompt'); if(pr) pr.textContent='Kezdéshez kattints a Start gombra.';
   qfRenderGrid();
 }
+const qfResetBtn=document.getElementById('qf-reset'); if(qfResetBtn) qfResetBtn.addEventListener('click', qfSetup);
+
 function qfRefillTilesDuringRun(){ QF.tiles=qfBuildTiles(); qfRenderGrid(); }
 function qfStart(){
   if(QF.timer){ clearInterval(QF.timer); QF.timer=null; }
@@ -624,5 +666,101 @@ const qfStartBtn=document.getElementById('qf-start'); if(qfStartBtn) qfStartBtn.
 function init(){  flashBuildDeck(); matchNewRound(); mcNext(); qfSetup(); }
 init();
 </script>
+
+<!-- === DB Import/Export Floating Panel === -->
+<style>
+#dbFab { position: fixed; right: 16px; bottom: 16px; z-index: 9999; display:flex; gap:8px; }
+#dbFab button { padding:10px 12px; border:none; border-radius:10px; box-shadow: 0 4px 12px rgba(0,0,0,.15); cursor:pointer; background:#222; color:#eee; }
+#dbModal { position: fixed; inset:0; background: rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:10000; }
+#dbModal .card { width:min(800px, 92vw); background:#fff; color:#111; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.3); }
+#dbModal h3 { margin:0 0 8px 0; }
+#dbModal textarea { width:100%; height:260px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13px; padding:10px; border-radius:8px; border:1px solid #ccc; }
+#dbModal .row { display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
+#dbToast { position:fixed; left:50%; transform:translateX(-50%); bottom:90px; background:#111; color:#fff; padding:10px 14px; border-radius:10px; display:none; z-index: 10001; }
+@media (prefers-color-scheme: dark) {
+  #dbModal .card { background:#1f1f1f; color:#eaeaea; }
+  #dbModal textarea { background:#111; color:#eaeaea; border-color:#444; }
+}
+</style>
+<div id="dbFab">
+  <button id="btnImport" title="Import JSON (paste more clusters)">DB import</button>
+  <button id="btnExport" title="Export current DB as JSON">DB export</button>
+</div>
+<div id="dbModal">
+  <div class="card">
+    <h3>DB import (JSON)</h3>
+    <p>Illessz be egy <strong>tömböt</strong> ilyen elemekkel: <code>{ id, en, hu, cluster }</code>.<br>Új elemek hozzáadódnak, azonos <code>id</code> kihagyva. Mentés <code>localStorage</code>-ba, majd automatikus frissítés.</p>
+    <textarea id="dbTextarea" placeholder='[{"id":"NEW1_001","en":"...","hu":"...","cluster":"New 1"}]'></textarea>
+    <div class="row">
+      <button id="dbCancel">Mégse</button>
+      <button id="dbImportGo">Importálás</button>
+    </div>
+  </div>
+</div>
+<div id="dbToast"></div>
+<script>
+(function(){
+  const modal = document.getElementById('dbModal');
+  const ta = document.getElementById('dbTextarea');
+  const toast = document.getElementById('dbToast');
+  function showToast(msg, ms=1600){
+    toast.textContent = msg; toast.style.display='block';
+    setTimeout(()=> toast.style.display='none', ms);
+  }
+  document.getElementById('btnImport').addEventListener('click', ()=>{
+    modal.style.display='flex';
+    ta.value = '';
+  });
+  document.getElementById('dbCancel').addEventListener('click', ()=>{
+    modal.style.display='none';
+  });
+  document.getElementById('dbImportGo').addEventListener('click', ()=>{
+    try{
+      const arr = JSON.parse(ta.value.trim());
+      if(!Array.isArray(arr)) throw new Error('A beillesztett JSON nem tömb.');
+      const prev = localStorage.getItem('EXTRA_DATA_JSON');
+      let base = [];
+      if(prev){
+        try{ const p = JSON.parse(prev); if(Array.isArray(p)) base = p; }catch{}
+      }
+      const seen = new Set(base.map(x=>x.id));
+      let added=0, skipped=0;
+      for(const it of arr){
+        if(it && typeof it==='object' && it.id && it.en && it.hu && it.cluster){
+          if(!seen.has(it.id)){
+            base.push({id:String(it.id), en:String(it.en), hu:String(it.hu), cluster:String(it.cluster)});
+            seen.add(it.id);
+            added++;
+          } else {
+            skipped++;
+          }
+        } else {
+          skipped++;
+        }
+      }
+      localStorage.setItem('EXTRA_DATA_JSON', JSON.stringify(base));
+      modal.style.display='none';
+      showToast('Import kész. Hozzáadva: '+added + (skipped? (', kihagyva: '+skipped):''));
+      setTimeout(()=> location.reload(), 650);
+    }catch(e){
+      showToast('Hiba: '+e.message, 2200);
+    }
+  });
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    try{
+      const data = (window.DATA||[]);
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'db_export.json';
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    }catch(e){
+      showToast('Export hiba: '+e.message, 2000);
+    }
+  });
+})();
+</script>
+<!-- === /DB Import/Export Floating Panel === -->
 </body>
 </html>
